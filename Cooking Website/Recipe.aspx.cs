@@ -1,6 +1,6 @@
-﻿using System;
+﻿using Cooking_Website.DAL;
+using System;
 using System.Web.UI;
-using Cooking_Website.DAL;
 
 namespace Cooking_Website
 {
@@ -14,7 +14,7 @@ namespace Cooking_Website
         {
             if (!int.TryParse(Request.QueryString["id"], out int id))
             {
-                Response.Redirect("~/Recipes.aspx");
+                Response.Redirect("/Recipes.aspx");
                 return;
             }
 
@@ -22,7 +22,7 @@ namespace Cooking_Website
 
             if (CurrentRecipe == null)
             {
-                Response.Redirect("~/Recipes.aspx");
+                Response.Redirect("/Recipes.aspx");
                 return;
             }
 

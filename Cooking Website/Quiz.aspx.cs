@@ -1,14 +1,8 @@
-﻿using System;
+﻿using Cooking_Website.Helpers;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Web;
-using System.Web.UI;
 using System.Web.UI.WebControls;
-using System.Web.Script.Serialization;
-using System.Web.ModelBinding;
-using Cooking_Website.Helpers;
-using System.Diagnostics;
 
 namespace Cooking_Website
 {
@@ -20,7 +14,7 @@ namespace Cooking_Website
         {
             if (Session["Id"] == null)
             {
-                Response.Redirect("Login.aspx");
+                Response.Redirect("/Login.aspx");
                 return;
             }
 
@@ -29,7 +23,8 @@ namespace Cooking_Website
                 // Load, shuffle and store in session
                 questions = QuizHelper.LoadQuizQuestions()
                     .OrderBy(q => Guid.NewGuid())
-                    .Select(q => {
+                    .Select(q =>
+                    {
                         q.Answers = q.Answers.OrderBy(a => Guid.NewGuid()).ToList();
                         return q;
                     })
@@ -67,7 +62,7 @@ namespace Cooking_Website
             DateTime start = (DateTime)Session["QuizStart"];
             Session["QuizTimer"] = (DateTime.Now - start).ToString(@"mm\:ss");
             Session["QuizResults"] = quizResults;
-            Response.Redirect("QuizResults.aspx");
+            Response.Redirect("/QuizResults.aspx");
         }
     }
 }

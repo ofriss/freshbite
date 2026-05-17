@@ -60,6 +60,22 @@
                 <input type="checkbox" id="cuisine-mexican" name="cuisine" value="mexican" onchange="checkCuisine()" />
                 Mexican
             </label>
+            <label>
+                <input type="checkbox" id="cuisine-american" name="cuisine" value="american" onchange="checkCuisine()" />
+                American
+            </label>
+            <label>
+                <input type="checkbox" id="cuisine-chinese" name="cuisine" value="chinese" onchange="checkCuisine()" />
+                Chinese
+            </label>
+            <label>
+                <input type="checkbox" id="cuisine-french" name="cuisine" value="french" onchange="checkCuisine()" />
+                French
+            </label>
+            <label>
+                <input type="checkbox" id="cuisine-other" name="cuisine" value="other" onchange="checkCuisine()" />
+                Other
+            </label>
         </div>
         <div id="cuisine-msg" class="msg"></div>
 
@@ -93,6 +109,6 @@
         <asp:Label ID="lblMessage" runat="server" CssClass="server-msg"></asp:Label>
     </div>
 
-    
+
 
 </asp:Content>

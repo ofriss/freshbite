@@ -94,7 +94,7 @@ namespace Cooking_Website
 
                         Application["LoggedIn"] = Application["LoggedIn"] != null ? (int)Application["LoggedIn"] + 1 : 1;
 
-                        Response.Redirect("Index.aspx");
+                        Response.Redirect("/Index.aspx");
                     }
                 }
 

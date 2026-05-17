@@ -13,7 +13,7 @@
         <aside class="inner-sidebar">
 
             <nav class="sidebar-nav">
-                <p class="sidebar-heading">Guides</p>
+                <p class="sidebar-heading"><asp:ContentPlaceHolder ID="Title" runat="server" /></p>
                 <ul>
                     <asp:ContentPlaceHolder ID="Nav" runat="server" />
                 </ul>

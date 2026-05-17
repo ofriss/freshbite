@@ -1,144 +1,69 @@
-﻿/**
- * Client-side validation helpers for the registration form.
- *
- * This module queries the DOM for the form controls and their corresponding
- * message elements, and exposes `onSubmit` and `onReset` functions used by
- * the form handlers. Each `check*` function validates a single field,
- * sets a human-friendly error message into the corresponding message element
- * (via `setMsg`) and returns `true` when the field is valid.
- *
- * Notes:
- * - Date parsing uses a 'T00:00:00' suffix to avoid timezone issues for
- *   YYYY-MM-DD inputs.
- * - `onSubmit` returns a boolean (all checks must pass) so it can be used
- *   directly as a form `onsubmit` handler (preventing submission when false).
- */
+﻿/* Form controls and message elements */
+const els = {
+    username: document.getElementById('uname'),
+    pwd: document.getElementById('pwd'),
+    pwdValid: document.getElementById('pwd-valid'),
+    bday: document.getElementById('bday'),
+    terms: document.getElementById('terms'),
+    skill: document.getElementById('skill'),
 
-/* Form controls */
-const username = document.getElementById('uname');
-const pwd = document.getElementById('pwd');
-const pwdValid = document.getElementById('pwd-valid');
-const bday = document.getElementById('bday');
-const terms = document.getElementById('terms');
-const skill = document.getElementById('skill');
+    usernameMsg: document.getElementById('uname-msg'),
+    pwdMsg: document.getElementById('pwd-msg'),
+    pwdValidMsg: document.getElementById('pwd-valid-msg'),
+    bdayMsg: document.getElementById('bday-msg'),
+    genderMsg: document.getElementById('gender-msg'),
+    termsMsg: document.getElementById('terms-msg'),
+    cuisineMsg: document.getElementById('cuisine-msg'),
+    skillMsg: document.getElementById('skill-msg')
+};
 
-/* Message elements shown to the user for validation feedback */
-const usernameMsg = document.getElementById('uname-msg');
-const pwdMsg = document.getElementById('pwd-msg');
-const pwdValidMsg = document.getElementById('pwd-valid-msg');
-const bdayMsg = document.getElementById('bday-msg');
-const genderMsg = document.getElementById('gender-msg');
-const termsMsg = document.getElementById('terms-msg');
-const cuisineMsg = document.getElementById('cuisine-msg');
-const skillMsg = document.getElementById('skill-msg');
-
-/**
- * Set the text content of a message element.
- *
- * @param {Element} el - The DOM element that will receive the message.
- * @param {string} [text=''] - Message text. Empty string clears the message.
- * @returns {boolean} True when message is empty (no error).
- */
+/* Utility: set message and return whether there's no error */
 function setMsg(el, text = '') {
     el.textContent = text;
     return text === '';
 }
 
-/**
- * Check whether a string contains both lowercase and uppercase letters.
- *
- * @param {string} s - Input string.
- * @returns {boolean} True when the string contains at least one lowercase
- * and one uppercase character.
- */
+/* Utility: require condition, set message on failure */
+function requireCondition(cond, el, msg) {
+    if (cond) {
+        setMsg(el);
+        return true;
+    }
+    setMsg(el, msg);
+    return false;
+}
+
+/* Check presence of both lowercase and uppercase */
 function hasLowerAndUpper(s) {
     return /[a-z]/.test(s) && /[A-Z]/.test(s);
 }
 
-/**
- * Validate the username.
- *
- * Rules:
- * - Must be at least 4 characters long after trimming.
- * - Must not contain whitespace.
- *
- * Sets `usernameMsg` on error.
- *
- * @returns {boolean} True when the username is valid.
- */
+/* Username validation */
 function checkName() {
-    const val = (username.value || '').trim();
-    if (val.length < 4) {
-        setMsg(usernameMsg, 'Username too short.');
-        return false;
-    }
-    if (/\s/.test(val)) {
-        setMsg(usernameMsg, 'No spaces allowed.');
-        return false;
-    }
-    setMsg(usernameMsg);
+    const val = (els.username.value || '').trim();
+    if (!requireCondition(val.length >= 6, els.usernameMsg, 'Username too short.')) return false;
+    if (!requireCondition(!/\s/.test(val), els.usernameMsg, 'No spaces allowed.')) return false;
     return true;
 }
 
-/**
- * Validate the password confirmation field matches the main password.
- *
- * Sets `pwdValidMsg` when the values don't match.
- *
- * @returns {boolean} True when passwords match.
- */
+/* Password confirmation */
 function checkPassValidation() {
-    const ok = pwd.value === pwdValid.value;
-    if (!ok) setMsg(pwdValidMsg, "Password doesn't match.");
-    else setMsg(pwdValidMsg);
-    return ok;
+    return requireCondition(els.pwd.value === els.pwdValid.value, els.pwdValidMsg, "Password doesn't match.");
 }
 
-/**
- * Validate the password field.
- *
- * Rules:
- * - No whitespace.
- * - Minimum length 8.
- * - Must contain both upper and lower case characters.
- *
- * This function calls `checkPassValidation()` first so users see mismatch
- * feedback early. It sets `pwdMsg` when the password fails validation.
- *
- * @returns {boolean} True when the password meets the rules.
- */
+/* Password validation */
 function checkPass() {
-    const val = pwd.value || '';
-    // validate match first so user sees that early
+    const val = els.pwd.value || '';
+    // Show confirmation mismatch early
     checkPassValidation();
 
-    if (/\s/.test(val)) {
-        setMsg(pwdMsg, 'No spaces allowed.');
-        return false;
-    }
-    if (val.length < 8) {
-        setMsg(pwdMsg, 'Password too short.');
-        return false;
-    }
-    if (!hasLowerAndUpper(val)) {
-        setMsg(pwdMsg, 'Must include upper & lower case.');
-        return false;
-    }
-    setMsg(pwdMsg);
+    if (!requireCondition(!/\s/.test(val), els.pwdMsg, 'No spaces allowed.')) return false;
+    if (!requireCondition(val.length >= 8, els.pwdMsg, 'Password too short.')) return false;
+    if (!requireCondition(hasLowerAndUpper(val), els.pwdMsg, 'Must include upper & lower case.')) return false;
     return true;
 }
 
-/**
- * Determine whether a birth date string represents at least `age` years old.
- *
- * The `dateString` is expected to be in a format accepted by the `Date`
- * constructor (commonly 'YYYY-MM-DD' from date inputs). Appending 'T00:00:00'
- * avoids timezone-related off-by-one-day issues.
- *
- * @param {string} dateString - Birth date string.
- * @param {number} age - Minimum required age in years.
- * @returns {boolean} True when the calculated age is >= `age`.
- */
+/* Age helper */
 function isAtLeastAge(dateString, age) {
     if (!dateString) return false;
     const birth = new Date(dateString + 'T00:00:00');
@@ -149,106 +74,37 @@ function isAtLeastAge(dateString, age) {
     return years >= age;
 }
 
-/**
- * Validate the birthday input.
- *
- * Rules:
- * - A value is required.
- * - User must be at least 12 years old.
- *
- * Sets `bdayMsg` on error.
- *
- * @returns {boolean} True when the birthday is provided and meets the age.
- */
+/* Birthday check */
 function checkBirthday() {
-    const val = bday.value;
-    if (!val) {
-        setMsg(bdayMsg, 'Birthday required.');
-        return false;
-    }
-    if (!isAtLeastAge(val, 12)) {
-        setMsg(bdayMsg, 'Must be at least 12.');
-        return false;
-    }
-    setMsg(bdayMsg);
+    const val = els.bday.value;
+    if (!requireCondition(!!val, els.bdayMsg, 'Birthday required.')) return false;
+    if (!requireCondition(isAtLeastAge(val, 12), els.bdayMsg, 'Must be at least 12.')) return false;
     return true;
 }
 
-/**
- * Ensure a gender option (radio) is selected.
- *
- * Looks for `input[name="gender"]:checked` and sets `genderMsg` if none is found.
- *
- * @returns {boolean} True when a gender radio is selected.
- */
+/* Gender radio check */
 function checkGender() {
     const selected = document.querySelector('input[name="gender"]:checked');
-    if (!selected) {
-        setMsg(genderMsg, 'Select gender.');
-        return false;
-    }
-    setMsg(genderMsg);
-    return true;
+    return requireCondition(!!selected, els.genderMsg, 'Select gender.');
 }
 
-/**
- * Ensure the terms checkbox is checked.
- *
- * Sets `termsMsg` when the terms are not agreed to.
- *
- * @returns {boolean} True when `terms` is checked.
- */
+/* Terms checkbox */
 function checkTerms() {
-    if (!terms.checked) {
-        setMsg(termsMsg, 'You must agree.');
-        return false;
-    }
-    setMsg(termsMsg);
-    return true;
+    return requireCondition(els.terms.checked, els.termsMsg, 'You must agree.');
 }
 
-/**
- * Validate cuisine preferences (checkbox group).
- *
- * Requires at least one `input[name="cuisine"]` to be checked. Updates `cuisineMsg`.
- *
- * @returns {boolean} True when at least one cuisine is selected.
- */
+/* Cuisine checkbox group */
 function checkCuisine() {
-    const checked = document.querySelectorAll('input[name="cuisine"]:checked');
-    if (!checked || checked.length === 0) {
-        setMsg(cuisineMsg, 'Select at least one cuisine.');
-        return false;
-    }
-    setMsg(cuisineMsg);
-    return true;
+    const checkedCount = document.querySelectorAll('input[name="cuisine"]:checked').length;
+    return requireCondition(checkedCount > 0, els.cuisineMsg, 'Select at least one cuisine.');
 }
 
-/**
- * Validate the skill/select input is set.
- *
- * Sets `skillMsg` when no selection is made.
- *
- * @returns {boolean} True when a skill level is selected.
- */
+/* Skill select */
 function checkSkill() {
-    if (!skill.value) {
-        setMsg(skillMsg, 'Select skill level.');
-        return false;
-    }
-    setMsg(skillMsg);
-    return true;
+    return requireCondition(!!els.skill.value, els.skillMsg, 'Select skill level.');
 }
 
-/**
- * Orchestrate all validations for form submission.
- *
- * Calls each `check*` function and returns true only if all validations pass.
- * Intended to be used as a form `onsubmit` handler; returning `false` will
- * prevent submission when validation fails.
- *
- * @returns {boolean} True when all fields are valid.
- */
+/* Orchestrate validations for submission */
 function onSubmit() {
     const nameOk = checkName();
     const passOk = checkPass();
@@ -262,11 +118,7 @@ function onSubmit() {
     return nameOk && passOk && passValidOk && bdayOk && genderOk && termsOk && cuisineOk && skillOk;
 }
 
-/**
- * Clear all validation messages.
- *
- * Useful as the handler for a form reset so the UI messages are removed.
- */
+/* Clear all validation messages (for form reset) */
 function onReset() {
-    [usernameMsg, pwdMsg, pwdValidMsg, bdayMsg, genderMsg, termsMsg, cuisineMsg, skillMsg].forEach(el => setMsg(el));
+    Object.values(els).forEach(el => setMsg(el))
 }

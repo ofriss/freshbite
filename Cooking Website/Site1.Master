@@ -18,7 +18,7 @@
     <form id="form1" runat="server">
         <!-- Navigation -->
         <nav class="navbar">
-            <a href="Index.aspx" class="logo transparent-link">FreshBite</a>
+            <a href="/Index.aspx" class="logo transparent-link">FreshBite</a>
             <ul class="nav-links">
                 <li><a href="/Tips.aspx">Tips & Tricks</a></li>
                 <li><a href="/Gallery.aspx">Gallery</a></li>
@@ -54,7 +54,7 @@
                                     <div class="profile-dropdown-email">Welcome back!</div>
                                 </div>
                             </div>
-                            <a class="profile-dropdown-item" href="Profile.aspx" role="menuitem">
+                            <a class="profile-dropdown-item" href="/Profile.aspx" role="menuitem">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
@@ -89,7 +89,7 @@
                             </svg>
                         </div>
                         <div class="profile-dropdown" role="menu">
-                            <a class="profile-dropdown-item" href="Login.aspx" role="menuitem">
+                            <a class="profile-dropdown-item" href="/Login.aspx" role="menuitem">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
                                     <polyline points="10 17 15 12 10 7" />
@@ -97,7 +97,7 @@
                                 </svg>
                                 Login
                             </a>
-                            <a class="profile-dropdown-item" href="Register.aspx" role="menuitem">
+                            <a class="profile-dropdown-item" href="/Register.aspx" role="menuitem">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
                                     <circle cx="12" cy="7" r="4" />
@@ -125,7 +125,7 @@
             <% if (Session["Id"] != null)
                 { %>
             <br />
-            <a class="plain-link" href="Logout.aspx">Click here to log out</a>
+            <a class="plain-link" href="/Logout.aspx">Click here to log out</a>
             <%} %>
         </footer>
     </form>

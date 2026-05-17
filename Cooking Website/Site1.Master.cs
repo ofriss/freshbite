@@ -11,7 +11,7 @@ namespace Cooking_Website
             Session.Clear();
             Session.Abandon();
             Application["LoggedIn"] = (int)Application["LoggedIn"] - 1;
-            Response.Redirect("Index.aspx");
+            Response.Redirect("/Index.aspx");
         }
         protected void btnLogout_Click(object sender, EventArgs e)
         {

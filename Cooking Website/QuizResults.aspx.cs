@@ -1,11 +1,6 @@
 ﻿using Cooking_Website.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
-using System.Xml.Schema;
 
 namespace Cooking_Website
 {
@@ -16,7 +11,7 @@ namespace Cooking_Website
         {
             if (Session["QuizResults"] == null)
             {
-                Response.Redirect("Quiz.aspx");
+                Response.Redirect("/Quiz.aspx");
                 return;
             }
 

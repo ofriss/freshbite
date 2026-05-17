@@ -1,11 +1,5 @@
 ﻿using Cooking_Website.Security;
 using System;
-using System.Configuration;
-using System.Data;
-using System.Data.SqlClient;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace Cooking_Website
 {
@@ -32,7 +26,7 @@ namespace Cooking_Website
             {
                 Session["Id"] = id;
                 Session["Username"] = username;
-                Response.Redirect("Index.aspx");
+                Response.Redirect("/Index.aspx");
                 lblMessage.Text = $"Login successful for {username}";
                 lblMessage.ForeColor = System.Drawing.Color.Green;
             }
@@ -43,6 +37,6 @@ namespace Cooking_Website
             }
         }
 
-        
+
     }
 }
