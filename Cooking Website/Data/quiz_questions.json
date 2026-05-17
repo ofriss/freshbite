@@ -1,0 +1,167 @@
+﻿[
+  {
+    "id": 1,
+    "question": "What does it mean to \"fold\" ingredients in baking?",
+    "answers": [
+      "Mix vigorously with a whisk",
+      "Gently combine without deflating air",
+      "Melt two ingredients together",
+      "Refrigerate the batter before baking"
+    ],
+    "correct": 1
+  },
+  {
+    "id": 2,
+    "question": "Which part of the egg acts as a natural emulsifier (helps oil and water mix)?",
+    "answers": [
+      "The egg white",
+      "The shell membrane",
+      "The yolk",
+      "The chalaza (the white stringy bit)"
+    ],
+    "correct": 2
+  },
+  {
+    "id": 3,
+    "question": "Why do recipes often tell you to salt pasta water?",
+    "answers": [
+      "It makes water boil faster",
+      "It prevents pasta from sticking together",
+      "It seasons the pasta from the inside out",
+      "It stops the pasta from going mushy"
+    ],
+    "correct": 2
+  },
+  {
+    "id": 4,
+    "question": "What is the \"Maillard reaction\"?",
+    "answers": [
+      "When vegetables lose their color from boiling",
+      "The browning process that creates flavor when food is seared or toasted",
+      "The way sugar crystallizes in candy",
+      "How bread rises in the oven"
+    ],
+    "correct": 1
+  },
+  {
+    "id": 5,
+    "question": "Which of these is NOT a fresh herb — it's always used dried?",
+    "answers": [
+      "Basil",
+      "Parsley",
+      "Bay leaf",
+      "Cilantro"
+    ],
+    "correct": 2
+  },
+  {
+    "id": 6,
+    "question": "What does \"al dente\" mean when cooking pasta?",
+    "answers": [
+      "Fully soft and well-cooked",
+      "Slightly firm when bitten",
+      "Cooked in salted water",
+      "Rinsed with cold water after draining"
+    ],
+    "correct": 1
+  },
+  {
+    "id": 7,
+    "question": "What happens when you add an acid (like lemon juice) to cut avocado?",
+    "answers": [
+      "It makes it crispier",
+      "It adds extra fat content",
+      "It slows down browning",
+      "It makes it ripen faster"
+    ],
+    "correct": 2
+  },
+  {
+    "id": 8,
+    "question": "Why do you let meat rest after cooking?",
+    "answers": [
+      "To let the outside crust form",
+      "To allow the juices to redistribute through the meat",
+      "To finish cooking the center with residual heat",
+      "To make it easier to slice thinly"
+    ],
+    "correct": 1
+  },
+  {
+    "id": 9,
+    "question": "What is \"mise en place\"?",
+    "answers": [
+      "A French sauce made with butter",
+      "A technique for rolling dough evenly",
+      "Having all ingredients prepped and ready before you start cooking",
+      "The correct way to hold a chef's knife"
+    ],
+    "correct": 2
+  },
+  {
+    "id": 10,
+    "question": "Which cooking method uses dry heat inside an enclosed space?",
+    "answers": [
+      "Poaching",
+      "Steaming",
+      "Braising",
+      "Baking"
+    ],
+    "correct": 3
+  },
+  {
+    "id": 11,
+    "question": "Why should you NOT wash raw chicken before cooking it?",
+    "answers": [
+      "It makes the skin less crispy",
+      "It spreads bacteria around your sink and kitchen",
+      "It removes the natural flavor",
+      "It causes the meat to toughen"
+    ],
+    "correct": 1
+  },
+  {
+    "id": 12,
+    "question": "What does baking soda need in order to work as a leavening agent?",
+    "answers": [
+      "Heat alone",
+      "Fat, like butter or oil",
+      "An acidic ingredient, like buttermilk or vinegar",
+      "Cold temperature"
+    ],
+    "correct": 2
+  },
+  {
+    "id": 13,
+    "question": "Which of these oils has the highest smoke point and is best for high-heat frying?",
+    "answers": [
+      "Extra virgin olive oil",
+      "Butter",
+      "Coconut oil",
+      "Avocado oil"
+    ],
+    "correct": 3
+  },
+  {
+    "id": 14,
+    "question": "What is the main purpose of kneading bread dough?",
+    "answers": [
+      "To add more air bubbles",
+      "To develop gluten, which gives bread its structure",
+      "To dissolve the yeast evenly",
+      "To cool the dough before it rises"
+    ],
+    "correct": 1
+  },
+  {
+    "id": 15,
+    "question": "If a recipe says to \"deglaze\" the pan, what do you do?",
+    "answers": [
+      "Scrub the pan clean between steps",
+      "Add cold water to stop the cooking process",
+      "Add liquid to lift the browned bits from the bottom of the pan",
+      "Coat the pan with oil before adding ingredients"
+    ],
+    "correct": 2
+  }
+]

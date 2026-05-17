@@ -1,0 +1,11 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/Sidebar.master" AutoEventWireup="true" CodeBehind="AdminSidebar.master.cs" Inherits="Cooking_Website.AdminSidebar" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+</asp:Content>
+<asp:Content ID="Content2" ContentPlaceHolderID="Nav" runat="server">
+    <li><a href="/Admin/ViewUsers.aspx">View Users</a></li>
+    <li><a href="/Admin/Statistics.aspx">Statistics</a></li>
+</asp:Content>
+<asp:Content ID="Content3" ContentPlaceHolderID="PageContent" runat="server">
+    <asp:ContentPlaceHolder ID="PageContent" runat="server" />
+</asp:Content>

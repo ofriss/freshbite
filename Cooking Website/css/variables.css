@@ -1,0 +1,14 @@
+﻿:root {
+    --primary: #1a1a18;
+    --secondary: #878780;
+    --green-dark: #2b4a35;
+    --green-mid: #3d6b4f;
+    --green-soft: #e8f0ea;
+    --green-border: #b8d0be;
+    --white: #ffffff;
+    --off-white: #f7f9f7;
+    --ink: #1a2b1e;
+    --ink-muted: #6b8070;
+    --font-heading: 'DM Serif Display', serif;
+    --font-body: 'DM Sans', sans-serif
+}

@@ -1,0 +1,138 @@
+﻿/* ── Center the card on the page ────────────────────────────── */
+.main-container {
+    width: 100%;
+    min-height: calc(100vh - 120px); /* account for navbar + footer */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+
+/* ── Card ────────────────────────────────────────────────────── */
+.timer-card {
+    background: var(--white);
+    border: 1.5px solid var(--green-border);
+    border-radius: 20px;
+    box-shadow: 0 4px 32px rgba(43, 74, 53, 0.09);
+    padding: 48px 56px 0; /* no bottom padding — progress bar sits flush */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 32px;
+    width: 100%;
+    max-width: 420px;
+    position: relative;
+    overflow: hidden;
+}
+
+
+/* ── Time Display ────────────────────────────────────────────── */
+.timer-display {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    cursor: text;
+    user-select: none;
+}
+
+/* Each HH / MM / SS segment */
+.time-seg {
+    font-family: var(--font-heading);
+    font-size: 4.5rem;
+    font-weight: 400;
+    color: var(--green-dark);
+    line-height: 1;
+    min-width: 2ch;
+    text-align: center;
+    border-radius: 6px;
+    padding: 4px 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+/* Highlight segment on hover when idle */
+.timer-display.idle .time-seg:hover {
+    background: var(--green-soft);
+    cursor: pointer;
+}
+
+/* Dim the display while running */
+.timer-display.running .time-seg {
+    color: var(--ink-muted);
+    cursor: default;
+}
+
+/* Flash red when time's up */
+.timer-display.done .time-seg {
+    color: #b94040;
+    animation: timerPulse 0.7s ease infinite alternate;
+}
+
+@keyframes timerPulse {
+    from {
+        opacity: 1;
+    }
+
+    to {
+        opacity: 0.3;
+    }
+}
+
+.time-colon {
+    font-family: var(--font-heading);
+    font-size: 4rem;
+    color: var(--green-border);
+    line-height: 1;
+    padding-bottom: 4px;
+    user-select: none;
+}
+
+
+/* ── Inline Segment Editor ───────────────────────────────────── */
+/*
+  A number input absolutely positioned over the active segment.
+  Hidden by default, shown by JS when a segment is clicked.
+*/
+.seg-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+}
+
+
+/* ── Start / Stop Button ─────────────────────────────────────── */
+.timer-btn {
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    background: var(--green-dark);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    padding: 13px 0;
+    width: 100%;
+    cursor: pointer;
+    transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.12s ease;
+    margin-bottom: 32px;
+}
+
+    .timer-btn:hover {
+        background: var(--green-mid);
+        box-shadow: 0 4px 16px rgba(43, 74, 53, 0.22);
+    }
+
+    .timer-btn:active {
+        transform: scale(0.98);
+    }
+
+    /* Button turns to a muted style when stopping */
+    .timer-btn.stopping {
+        background: var(--green-soft);
+        color: var(--green-dark);
+        border: 1.5px solid var(--green-border);
+        box-shadow: none;
+    }

@@ -1,0 +1,90 @@
+﻿/* ── Two-column layout ───────────────────────────────────────── */
+.inner-layout {
+    display: flex;
+    align-items: flex-start;
+    min-height: calc(100vh - 120px);
+}
+
+
+/* ── Sidebar ─────────────────────────────────────────────────── */
+.inner-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--green-border);
+    padding: 36px 18px;
+    min-height: calc(100vh - 120px);
+    position: sticky;
+    top: 0;
+    align-self: flex-start;
+}
+
+.sidebar-heading {
+    font-family: var(--font-body);
+    font-size: 0.7rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-muted);
+    margin-bottom: 10px;
+}
+
+.sidebar-nav ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.sidebar-nav a {
+    display: block;
+    font-family: var(--font-body);
+    font-size: 0.92rem;
+    font-weight: 400;
+    color: var(--ink);
+    text-decoration: none;
+    padding: 7px 10px;
+    border-radius: 7px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+    .sidebar-nav a:hover {
+        background: var(--green-soft);
+        color: var(--green-dark);
+    }
+
+    /* Add class="active" to the link matching the current page */
+    .sidebar-nav a.active {
+        background: var(--green-soft);
+        color: var(--green-dark);
+        font-weight: 500;
+    }
+
+
+/* ── Page content area ───────────────────────────────────────── */
+.inner-content {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .inner-layout {
+        flex-direction: column;
+    }
+
+    .inner-sidebar {
+        width: 100%;
+        min-height: unset;
+        position: static;
+        border-right: none;
+        border-bottom: 1px solid var(--green-border);
+        padding: 16px 20px;
+    }
+
+    .sidebar-nav ul {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+}

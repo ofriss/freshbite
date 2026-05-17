@@ -1,0 +1,14 @@
+﻿.tip-section {
+    background: white;
+    padding: 25px 30px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    border: 1px solid #eee;
+}
+
+    .tip-section h2 {
+        margin-top: 0;
+        font-size: 1.6rem;
+        color: #444;
+    }
