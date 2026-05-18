@@ -7,29 +7,38 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace Cooking_Website.Admin
+namespace Cooking_Website.Utilities
 {
 
 
-    public partial class ViewUsers
+    public partial class UtilitiesSidebar
     {
 
         /// <summary>
-        /// adminDiv control.
+        /// Head control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.HtmlControls.HtmlGenericControl adminDiv;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder Head;
 
         /// <summary>
-        /// errorMsg control.
+        /// Title control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.Label errorMsg;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder Title;
+
+        /// <summary>
+        /// Body control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder Body;
     }
 }

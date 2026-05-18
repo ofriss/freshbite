@@ -1,6 +1,9 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Guide/GuideSidebar.Master" AutoEventWireup="true" CodeBehind="FishGuide.aspx.cs" Inherits="Cooking_Website.FishGuide" %>
+﻿<%@ Page Language="C#" MasterPageFile="~/Guides/GuideSidebar.Master" AutoEventWireup="true" CodeBehind="FishGuide.aspx.cs" Inherits="Cooking_Website.FishGuide" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="PageContent" runat="server">
+<asp:Content ID="Content2" ContentPlaceHolderID="Title" runat="server">
+    Fish Guide
+</asp:Content>
+<asp:Content ID="Content1" ContentPlaceHolderID="Body" runat="server">
     <main class="guide-container">
 
         <div class="guide-header">

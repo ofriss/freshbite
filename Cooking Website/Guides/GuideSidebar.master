@@ -1,0 +1,29 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/Sidebar.master" AutoEventWireup="true" CodeBehind="GuideSidebar.master.cs" Inherits="Cooking_Website.GuideSidebar" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
+    <link rel="stylesheet" href="/css/guide.css" />
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="Nav" runat="server">
+    <li><a href="/Guides/MeatGuide.aspx">Meat</a></li>
+    <li><a href="/Guides/PoultryGuide.aspx">Poultry</a></li>
+    <li><a href="/Guides/FishGuide.aspx">Fish &amp; Seafood</a></li>
+    <li><a href="/Guides/VegetablesGuide.aspx">Vegetables</a></li>
+    <li><a href="/Guides/EggsGuide.aspx">Eggs &amp; Dairy</a></li>
+    <li><a href="/Guides/PastaGuide.aspx">Pasta &amp; Grains</a></li>
+    <li><a href="/Guides/BakingGuide.aspx">Bread &amp; Baking</a></li>
+    <li><a href="/Guides/SoupsGuide.aspx">Soups &amp; Stews</a></li>
+    <li><a href="/Guides/SaucesGuide.aspx">Sauces</a></li>
+</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="Body" runat="server">
+    <asp:ContentPlaceHolder ID="Body" runat="server" />
+</asp:Content>
+
+<asp:Content ID="Content4" ContentPlaceHolderID="SidebarHeader" runat="server">
+    Guides
+</asp:Content>
+
+<asp:Content ID="Content5" ContentPlaceHolderID="Title" runat="server">
+    <asp:ContentPlaceHolder ID="Title" runat="server" />
+</asp:Content>

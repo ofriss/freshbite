@@ -1,10 +1,10 @@
 ﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="Index.aspx.cs" Inherits="Cooking_Website.Index" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
     <link rel="stylesheet" href="/css/index.css" />
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="body" runat="server">
+<asp:Content ID="Content2" ContentPlaceHolderID="Body" runat="server">
 
     <!-- ── Hero ── -->
     <section class="hero">
@@ -25,7 +25,7 @@
             <span class="feature-icon">&#9997;</span>
             <h3>Cooking Guides</h3>
             <p>In-depth guides for every ingredient — from meat and fish to bread and sauces. Learn the techniques, not just the recipe.</p>
-            <a href="/MeatGuide.aspx" class="feature-link">Browse guides &#8594;</a>
+            <a href="/Guides/MeatGuide.aspx" class="feature-link">Browse guides &#8594;</a>
         </div>
         <div class="feature-card">
             <span class="feature-icon">&#127859;</span>
@@ -37,8 +37,8 @@
             <span class="feature-icon">&#9201;</span>
             <h3>Kitchen Tools</h3>
             <p>A units calculator for any measurement in any recipe, and a distraction-free cooking timer — always a click away.</p>
-            <a href="/UnitsCalculator.aspx" class="feature-link">Calculator &#8594;</a>
-            <a href="/Timer.aspx" class="feature-link">Timer &#8594;</a>
+            <a href="/Utilities/UnitsCalculator.aspx" class="feature-link">Calculator &#8594;</a>
+            <a href="/Utilities/Timer.aspx" class="feature-link">Timer &#8594;</a>
         </div>
     </section>
 

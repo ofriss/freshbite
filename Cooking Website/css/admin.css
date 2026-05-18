@@ -1,0 +1,304 @@
+﻿/* ============================================================
+   admin.css
+   All admin pages — Statistics, ViewUsers, ManageUsers.
+   Layout handled by Sidebar.master + inner.css.
+   ============================================================ */
+
+
+/* ── Admin content wrapper ───────────────────────────────────── */
+.admin-content {
+    padding: 36px 40px 80px;
+}
+
+
+/* ── Page title ──────────────────────────────────────────────── */
+.admin-title {
+    font-family: var(--font-heading);
+    font-size: 2rem;
+    font-weight: 400;
+    color: var(--green-dark);
+    margin-bottom: 28px;
+    padding-bottom: 12px;
+    border-bottom: 1.5px solid var(--green-border);
+}
+
+
+/* ── Shared table base ───────────────────────────────────────── */
+.admin-content table,
+.users-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    background: var(--white);
+    border: 1.5px solid var(--green-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+    .admin-content table th,
+    .users-table th {
+        font-size: 0.72rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--ink-muted);
+        background: var(--green-soft);
+        padding: 12px 18px;
+        text-align: left;
+        border-bottom: 1.5px solid var(--green-border);
+        white-space: nowrap;
+    }
+
+    .admin-content table td,
+    .users-table td {
+        padding: 12px 18px;
+        color: var(--ink);
+        border-bottom: 1px solid var(--green-border);
+        vertical-align: middle;
+    }
+
+    .admin-content table tr:last-child td,
+    .users-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .admin-content table tbody tr:hover,
+    .users-table tbody tr:hover {
+        background: var(--off-white);
+    }
+
+
+/* ── Table wrappers ──────────────────────────────────────────── */
+#adminDiv,
+.manage-table-wrapper {
+    overflow-x: auto;
+    margin-bottom: 24px;
+}
+
+
+/* ── Error / server messages ─────────────────────────────────── */
+#errorMsg,
+.manage-error {
+    display: block;
+    margin-top: 12px;
+    font-size: 0.9rem;
+    color: #a33;
+    font-family: var(--font-body);
+}
+
+.manage-server-msg {
+    display: block;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+
+/* ── Manage Users page header ────────────────────────────────── */
+.manage-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+    .manage-header .admin-title {
+        margin-bottom: 0;
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+
+.manage-add-btn {
+    width: auto;
+    padding: 10px 20px;
+    font-size: 0.88rem;
+    margin-top: 0;
+}
+
+
+/* ── Action buttons in the users table ───────────────────────── */
+.action-cell {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.edit-btn {
+    background: var(--green-soft);
+    color: var(--green-dark);
+    border: 1px solid var(--green-border);
+}
+
+    .edit-btn:hover {
+        background: var(--green-border);
+    }
+
+.delete-btn {
+    background: #fce8e8;
+    color: #a33;
+    border: 1px solid #f5c0c0;
+}
+
+    .delete-btn:hover {
+        background: #f5c0c0;
+    }
+
+
+/* ── Form panel overlay ──────────────────────────────────────── */
+.form-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 43, 30, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 300;
+    animation: panelFadeIn 0.2s ease;
+}
+
+@keyframes panelFadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
+}
+
+.manage-form {
+    position: relative;
+    max-height: 90vh;
+    overflow-y: auto;
+    width: 100%;
+    max-width: 520px;
+    animation: panelSlideIn 0.22s ease;
+}
+
+@keyframes panelSlideIn {
+    from {
+        transform: translateY(12px);
+        opacity: 0;
+    }
+
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.manage-form-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 4px;
+}
+
+    .manage-form-header .form-title {
+        text-align: left;
+        margin-bottom: 0;
+    }
+
+.panel-close-btn {
+    background: none;
+    border: none;
+    font-size: 1rem;
+    color: #999;
+    cursor: pointer;
+    padding: 4px;
+    flex-shrink: 0;
+    transition: color 0.15s ease;
+    margin-top: 6px;
+}
+
+    .panel-close-btn:hover {
+        color: #333;
+    }
+
+
+/* ── Delete confirm panel ────────────────────────────────────── */
+.delete-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(26, 43, 30, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 400;
+    animation: panelFadeIn 0.2s ease;
+}
+
+.delete-confirm-box {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 32px 36px;
+    max-width: 380px;
+    width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.14);
+    text-align: center;
+}
+
+.delete-confirm-msg {
+    font-size: 1rem;
+    color: var(--ink);
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+.delete-confirm-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+    .delete-confirm-actions .btn {
+        width: auto;
+        padding: 10px 24px;
+        margin-top: 0;
+    }
+
+.delete-confirm-btn {
+    background: #a33;
+}
+
+    .delete-confirm-btn:hover {
+        background: #8a2222;
+    }
+
+
+/* ── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 640px) {
+    .admin-content {
+        padding: 24px 16px 60px;
+    }
+
+        .admin-content table th,
+        .admin-content table td,
+        .users-table th,
+        .users-table td {
+            padding: 10px 12px;
+        }
+
+    .manage-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .manage-form {
+        max-height: 100vh;
+        border-radius: 0;
+    }
+}

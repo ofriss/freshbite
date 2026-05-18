@@ -67,14 +67,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Admin\ManageUsers.aspx" />
     <Content Include="Admin\Statistics.aspx" />
     <Content Include="Admin\ViewUsers.aspx" />
     <Content Include="App_Data\Database1.mdf" />
     <Content Include="App_Data\Database1_log.ldf">
       <DependentUpon>Database1.mdf</DependentUpon>
     </Content>
+    <Content Include="css\admin.css" />
     <Content Include="Global.asax" />
-    <Content Include="Guide\BakingGuide.aspx" />
+    <Content Include="Guides\BakingGuide.aspx" />
     <Content Include="css\form.css" />
     <Content Include="css\gallery.css" />
     <Content Include="css\guide.css" />
@@ -90,12 +92,13 @@
     <Content Include="css\tips.css" />
     <Content Include="css\units-calculator.css" />
     <Content Include="css\variables.css" />
-    <Content Include="Guide\EggsGuide.aspx" />
-    <Content Include="Guide\FishGuide.aspx" />
+    <Content Include="Guides\EggsGuide.aspx" />
+    <Content Include="Guides\FishGuide.aspx" />
     <Content Include="Gallery.aspx" />
     <Content Include="Index.aspx" />
     <Content Include="js\gallery.js" />
     <Content Include="js\login.js" />
+    <Content Include="js\manage-users.js" />
     <Content Include="js\profile.js" />
     <Content Include="js\quiz.js" />
     <Content Include="js\recipe.js" />
@@ -104,21 +107,21 @@
     <Content Include="js\timer.js" />
     <Content Include="js\units-calculator.js" />
     <Content Include="Login.aspx" />
-    <Content Include="Guide\MeatGuide.aspx" />
-    <Content Include="Guide\PastaGuide.aspx" />
-    <Content Include="Guide\PoultryGuide.aspx" />
+    <Content Include="Guides\MeatGuide.aspx" />
+    <Content Include="Guides\PastaGuide.aspx" />
+    <Content Include="Guides\PoultryGuide.aspx" />
     <Content Include="Profile.aspx" />
     <Content Include="Quiz.aspx" />
     <Content Include="QuizResults.aspx" />
     <Content Include="Recipe.aspx" />
     <Content Include="Recipes.aspx" />
     <Content Include="Register.aspx" />
-    <Content Include="Guide\SaucesGuide.aspx" />
-    <Content Include="Guide\SoupsGuide.aspx" />
-    <Content Include="Timer.aspx" />
+    <Content Include="Guides\SaucesGuide.aspx" />
+    <Content Include="Guides\SoupsGuide.aspx" />
+    <Content Include="Utilities\Timer.aspx" />
     <Content Include="Tips.aspx" />
-    <Content Include="UnitsCalculator.aspx" />
-    <Content Include="Guide\VegetablesGuide.aspx" />
+    <Content Include="Utilities\UnitsCalculator.aspx" />
+    <Content Include="Guides\VegetablesGuide.aspx" />
     <Content Include="Web.config" />
   </ItemGroup>
   <ItemGroup>
@@ -128,6 +131,13 @@
     </Compile>
     <Compile Include="Admin\AdminSidebar.master.designer.cs">
       <DependentUpon>AdminSidebar.master</DependentUpon>
+    </Compile>
+    <Compile Include="Admin\ManageUsers.aspx.cs">
+      <DependentUpon>ManageUsers.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Admin\ManageUsers.aspx.designer.cs">
+      <DependentUpon>ManageUsers.aspx</DependentUpon>
     </Compile>
     <Compile Include="Admin\Statistics.aspx.cs">
       <DependentUpon>Statistics.aspx</DependentUpon>
@@ -146,26 +156,26 @@
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
-    <Compile Include="Guide\BakingGuide.aspx.cs">
+    <Compile Include="Guides\BakingGuide.aspx.cs">
       <DependentUpon>BakingGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\BakingGuide.aspx.designer.cs">
+    <Compile Include="Guides\BakingGuide.aspx.designer.cs">
       <DependentUpon>BakingGuide.aspx</DependentUpon>
     </Compile>
     <Compile Include="DAL\RecipeRepository.cs" />
-    <Compile Include="Guide\EggsGuide.aspx.cs">
+    <Compile Include="Guides\EggsGuide.aspx.cs">
       <DependentUpon>EggsGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\EggsGuide.aspx.designer.cs">
+    <Compile Include="Guides\EggsGuide.aspx.designer.cs">
       <DependentUpon>EggsGuide.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Guide\FishGuide.aspx.cs">
+    <Compile Include="Guides\FishGuide.aspx.cs">
       <DependentUpon>FishGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\FishGuide.aspx.designer.cs">
+    <Compile Include="Guides\FishGuide.aspx.designer.cs">
       <DependentUpon>FishGuide.aspx</DependentUpon>
     </Compile>
     <Compile Include="Gallery.aspx.cs">
@@ -175,11 +185,11 @@
     <Compile Include="Gallery.aspx.designer.cs">
       <DependentUpon>Gallery.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Guide\GuideSidebar.master.cs">
+    <Compile Include="Guides\GuideSidebar.master.cs">
       <DependentUpon>GuideSidebar.master</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\GuideSidebar.master.designer.cs">
+    <Compile Include="Guides\GuideSidebar.master.designer.cs">
       <DependentUpon>GuideSidebar.master</DependentUpon>
     </Compile>
     <Compile Include="Helpers\QuizHelper.cs" />
@@ -204,25 +214,25 @@
     <Compile Include="Login.aspx.designer.cs">
       <DependentUpon>Login.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Guide\MeatGuide.aspx.cs">
+    <Compile Include="Guides\MeatGuide.aspx.cs">
       <DependentUpon>MeatGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\MeatGuide.aspx.designer.cs">
+    <Compile Include="Guides\MeatGuide.aspx.designer.cs">
       <DependentUpon>MeatGuide.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Guide\PastaGuide.aspx.cs">
+    <Compile Include="Guides\PastaGuide.aspx.cs">
       <DependentUpon>PastaGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\PastaGuide.aspx.designer.cs">
+    <Compile Include="Guides\PastaGuide.aspx.designer.cs">
       <DependentUpon>PastaGuide.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Guide\PoultryGuide.aspx.cs">
+    <Compile Include="Guides\PoultryGuide.aspx.cs">
       <DependentUpon>PoultryGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\PoultryGuide.aspx.designer.cs">
+    <Compile Include="Guides\PoultryGuide.aspx.designer.cs">
       <DependentUpon>PoultryGuide.aspx</DependentUpon>
     </Compile>
     <Compile Include="Profile.aspx.cs">
@@ -269,11 +279,11 @@
       <DependentUpon>Register.aspx</DependentUpon>
     </Compile>
     <Compile Include="Helpers\SqlHelper.cs" />
-    <Compile Include="Guide\SaucesGuide.aspx.cs">
+    <Compile Include="Guides\SaucesGuide.aspx.cs">
       <DependentUpon>SaucesGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\SaucesGuide.aspx.designer.cs">
+    <Compile Include="Guides\SaucesGuide.aspx.designer.cs">
       <DependentUpon>SaucesGuide.aspx</DependentUpon>
     </Compile>
     <Compile Include="Site1.Master.cs">
@@ -283,18 +293,18 @@
     <Compile Include="Site1.Master.designer.cs">
       <DependentUpon>Site1.Master</DependentUpon>
     </Compile>
-    <Compile Include="Guide\SoupsGuide.aspx.cs">
+    <Compile Include="Guides\SoupsGuide.aspx.cs">
       <DependentUpon>SoupsGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\SoupsGuide.aspx.designer.cs">
+    <Compile Include="Guides\SoupsGuide.aspx.designer.cs">
       <DependentUpon>SoupsGuide.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Timer.aspx.cs">
+    <Compile Include="Utilities\Timer.aspx.cs">
       <DependentUpon>Timer.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Timer.aspx.designer.cs">
+    <Compile Include="Utilities\Timer.aspx.designer.cs">
       <DependentUpon>Timer.aspx</DependentUpon>
     </Compile>
     <Compile Include="Tips.aspx.cs">
@@ -304,29 +314,37 @@
     <Compile Include="Tips.aspx.designer.cs">
       <DependentUpon>Tips.aspx</DependentUpon>
     </Compile>
-    <Compile Include="UnitsCalculator.aspx.cs">
+    <Compile Include="Utilities\UnitsCalculator.aspx.cs">
       <DependentUpon>UnitsCalculator.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="UnitsCalculator.aspx.designer.cs">
+    <Compile Include="Utilities\UnitsCalculator.aspx.designer.cs">
       <DependentUpon>UnitsCalculator.aspx</DependentUpon>
     </Compile>
-    <Compile Include="Guide\VegetablesGuide.aspx.cs">
+    <Compile Include="Guides\VegetablesGuide.aspx.cs">
       <DependentUpon>VegetablesGuide.aspx</DependentUpon>
       <SubType>ASPXCodeBehind</SubType>
     </Compile>
-    <Compile Include="Guide\VegetablesGuide.aspx.designer.cs">
+    <Compile Include="Guides\VegetablesGuide.aspx.designer.cs">
       <DependentUpon>VegetablesGuide.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\UtilitiesSidebar.master.cs">
+      <DependentUpon>UtilitiesSidebar.master</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Utilities\UtilitiesSidebar.master.designer.cs">
+      <DependentUpon>UtilitiesSidebar.master</DependentUpon>
     </Compile>
   </ItemGroup>
   <ItemGroup>
     <Content Include="Data\quiz_questions.json" />
     <Content Include="Data\Web.config" />
     <Content Include="Sidebar.master" />
-    <Content Include="Guide\GuideSidebar.master" />
+    <Content Include="Guides\GuideSidebar.master" />
     <Content Include="Admin\AdminSidebar.master" />
     <None Include="packages.config" />
     <Content Include="Site1.Master" />
+    <Content Include="Utilities\UtilitiesSidebar.master" />
     <None Include="Web.Debug.config">
       <DependentUpon>Web.config</DependentUpon>
     </None>

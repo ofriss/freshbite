@@ -15,13 +15,13 @@ namespace Cooking_Website
     {
 
         /// <summary>
-        /// head control.
+        /// Head control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder head;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder Head;
 
         /// <summary>
         /// Title control.
@@ -33,6 +33,15 @@ namespace Cooking_Website
         protected global::System.Web.UI.WebControls.ContentPlaceHolder Title;
 
         /// <summary>
+        /// SidebarHeader control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder SidebarHeader;
+
+        /// <summary>
         /// Nav control.
         /// </summary>
         /// <remarks>
@@ -42,12 +51,12 @@ namespace Cooking_Website
         protected global::System.Web.UI.WebControls.ContentPlaceHolder Nav;
 
         /// <summary>
-        /// PageContent control.
+        /// Body control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.ContentPlaceHolder PageContent;
+        protected global::System.Web.UI.WebControls.ContentPlaceHolder Body;
     }
 }

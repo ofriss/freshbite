@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
-using System.Web.UI;
-using System.Web.UI.WebControls;
 
 namespace Cooking_Website
 {
@@ -11,7 +6,10 @@ namespace Cooking_Website
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-
+            if ((string)Session["Username"] == "ofri")
+            {
+                Response.Redirect("/Index.aspx");
+            }
         }
     }
 }

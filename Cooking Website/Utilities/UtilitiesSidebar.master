@@ -1,0 +1,22 @@
+﻿<%@ Master Language="C#" MasterPageFile="~/Sidebar.master" AutoEventWireup="true" CodeBehind="UtilitiesSidebar.master.cs" Inherits="Cooking_Website.Utilities.UtilitiesSidebar" %>
+
+<asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
+    <asp:ContentPlaceHolder ID="Head" runat="server" />
+</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="Title" runat="server">
+    <asp:ContentPlaceHolder ID="Title" runat="server" />
+</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="SidebarHeader" runat="server">
+    Utilities
+</asp:Content>
+
+<asp:Content ID="Content4" ContentPlaceHolderID="Nav" runat="server">
+    <li><a href="/Utilities/UnitsCalculator.aspx">Calculator</a></li>
+    <li><a href="/Utilities/Timer.aspx">Timer</a></li>
+</asp:Content>
+
+<asp:Content ID="Content5" ContentPlaceHolderID="Body" runat="server">
+    <asp:ContentPlaceHolder ID="Body" runat="server" />
+</asp:Content>

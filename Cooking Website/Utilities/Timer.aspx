@@ -1,10 +1,11 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="Timer.aspx.cs" Inherits="Cooking_Website.Timer" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Utilities/UtilitiesSidebar.Master" AutoEventWireup="true" CodeBehind="Timer.aspx.cs" Inherits="Cooking_Website.Timer" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
     <link rel="stylesheet" href="/css/timer.css" />
     <script src="/js/timer.js" defer></script>
 </asp:Content>
-<asp:Content ID="Content2" ContentPlaceHolderID="body" runat="server">
+
+<asp:Content ID="Content2" ContentPlaceHolderID="Body" runat="server">
     <main class="main-container">
 
     <div class="timer-card">
@@ -33,3 +34,5 @@
 
 </main>
 </asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="Title" runat="server">Timer</asp:Content>

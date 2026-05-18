@@ -1,10 +1,11 @@
-﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="UnitsCalculator.aspx.cs" Inherits="Cooking_Website.UnitsCalculator" %>
+﻿<%@ Page Title="" Language="C#" MasterPageFile="~/Utilities/UtilitiesSidebar.Master" AutoEventWireup="true" CodeBehind="UnitsCalculator.aspx.cs" Inherits="Cooking_Website.UnitsCalculator" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
     <link rel="stylesheet" href="/css/units-calculator.css" />
     <script src="/js/units-calculator.js" defer></script>
 </asp:Content>
-<asp:Content ID="Content2" ContentPlaceHolderID="body" runat="server">
+
+<asp:Content ID="Content2" ContentPlaceHolderID="Body" runat="server">
     <main class="main-container">
 
         <div class="page-title-block">
@@ -82,3 +83,5 @@
 
     </main>
 </asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="Title" runat="server">Units Calculator</asp:Content>
