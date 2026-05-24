@@ -2,7 +2,11 @@
     AutoEventWireup="true" CodeBehind="ManageUsers.aspx.cs"
     Inherits="Cooking_Website.Admin.ManageUsers" %>
 
-<asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
+<asp:Content ID="Content1" ContentPlaceHolderID="Header" runat="server">Manage Users</asp:Content>
+
+<asp:Content ID="Content2" ContentPlaceHolderID="Title" runat="server">Manage Users</asp:Content>
+
+<asp:Content ID="Content3" ContentPlaceHolderID="Head" runat="server">
     <link rel="stylesheet" href="/css/form.css" />
     <script type="text/javascript">
         var ManageUsersConfig = {
@@ -15,12 +19,8 @@
     <script src="/js/manage-users.js" defer></script>
 </asp:Content>
 
-<asp:Content ID="Content2" ContentPlaceHolderID="Body" runat="server">
-    <!-- ── Page Header ── -->
-    <div class="manage-header">
-        <h2 class="admin-title">Manage Users</h2>
-        <button class="btn manage-add-btn" type="button" onclick="openCreate()">+ Add User</button>
-    </div>
+<asp:Content ID="Content4" ContentPlaceHolderID="Body" runat="server">
+    <button class="btn manage-add-btn" type="button" onclick="openCreate()">+ Add User</button>
 
     <!-- ── Server Message ── -->
     <asp:Label ID="lblMessage" runat="server" CssClass="manage-server-msg"></asp:Label>

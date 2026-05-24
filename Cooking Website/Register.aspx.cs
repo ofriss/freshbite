@@ -1,6 +1,8 @@
 ﻿using Cooking_Website.Security;
 using System;
 using System.Data.SqlClient;
+using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Cooking_Website
 {
@@ -31,7 +33,6 @@ namespace Cooking_Website
                 return;
             }
 
-            // Is registration successful?
             if (InsertUserIntoDatabase())
             {
                 lblMessage.Text = $"Registration successful for {username}";
@@ -92,7 +93,7 @@ namespace Cooking_Website
                         Session["Id"] = newId;
                         Session["Username"] = username;
 
-                        Application["LoggedIn"] = Application["LoggedIn"] != null ? (int)Application["LoggedIn"] + 1 : 1;
+                        Application["LoggedIn"] = (int)Application["LoggedIn"] + 1;
 
                         Response.Redirect("/Index.aspx");
                     }
@@ -112,30 +113,56 @@ namespace Cooking_Website
             if (string.IsNullOrWhiteSpace(username))
                 return "Username is missing.";
 
+            if (username.Length < 6)
+                return "Username is too short.";
+
             if (username.Contains(" "))
                 return "Username can't have spaces.";
+
+            if (Regex.IsMatch(username, @"[^a-zA-Z0-9]"))
+                return "Username can't have special characters.";
 
             if (string.IsNullOrWhiteSpace(password))
                 return "Password is missing.";
 
+            if (password.Length < 8)
+                return "Password is too short.";
+
             if (password.Contains(" "))
                 return "Password can't have spaces.";
+
+            if (!password.Any(char.IsLower) || !password.Any(char.IsUpper))
+                return "Password must have upper and lower letters.";
+
+            if (Regex.IsMatch(password, @"[^a-zA-Z0-9]"))
+                return "Password can't have special characters.";
 
             if (string.IsNullOrWhiteSpace(birthday))
                 return "Birthday is missing.";
 
+            if (!DateTime.TryParse(birthday, out _))
+                return "Birthday is invalid.";
+
             if (string.IsNullOrWhiteSpace(gender))
                 return "Gender is missing.";
 
+            if (gender != "male" && gender != "female")
+                return "Gender is invalid.";
+
             if (string.IsNullOrWhiteSpace(cuisine))
-                return "Preferred cuisine is missing.";
+                return "Cuisine is missing.";
 
             if (string.IsNullOrWhiteSpace(skill))
                 return "Skill level is missing.";
 
-            // StringComparison.OrdinalIgnoreCase makes the comparison case-insensitive
-            if (!string.Equals(terms, "yes", StringComparison.OrdinalIgnoreCase))
-                return "You must agree to the terms.";
+            if (skill != "beginner" && skill != "intermediate" && skill != "advanced")
+                return "Skill level is invalid.";
+
+            if (string.IsNullOrWhiteSpace(terms) || terms != "yes")
+                return "You must agree to the terms of use.";
+
+            username = username.Trim();
+            password = password.Trim();
 
             return null;
         }

@@ -6,7 +6,7 @@ namespace Cooking_Website
     {
         protected void Page_Load(object sender, EventArgs e)
         {
-            if ((string)Session["Username"] == "ofri")
+            if ((string)Session["Username"] != "ofri")
             {
                 Response.Redirect("/Index.aspx");
             }

@@ -5,7 +5,9 @@
 <html>
 <head runat="server">
     <meta charset="UTF-8" />
-    <title><asp:ContentPlaceHolder ID="Title" runat="server"></asp:ContentPlaceHolder> - FreshBite</title>
+    <title>
+        <asp:ContentPlaceHolder ID="Title" runat="server"></asp:ContentPlaceHolder>
+        - FreshBite</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -20,13 +22,19 @@
         <nav class="navbar">
             <a href="/Index.aspx" class="logo transparent-link">FreshBite</a>
             <ul class="nav-links">
+
                 <li><a href="/Tips.aspx">Tips & Tricks</a></li>
                 <li><a href="/Gallery.aspx">Gallery</a></li>
                 <li><a href="/Utilities/UnitsCalculator.aspx">Utilities</a></li>
+
                 <% if (Session["Id"] != null)
                     {
                 %>
                 <li><a href="/Quiz.aspx">Quiz</a></li>
+                <% } %>
+                <% if ((string)Session["Username"] == "ofri")
+                    { %>
+                <li><a href="/Admin/ViewUsers.aspx">Admin</a></li>
                 <% } %>
                 <li>
                     <% if (Session["Id"] != null)

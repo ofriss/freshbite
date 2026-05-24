@@ -8,9 +8,10 @@ namespace Cooking_Website
     {
         private void Logout()
         {
+            if (Session["Id"] != null)
+                Application["LoggedIn"] = (int)Application["LoggedIn"] - 1;
             Session.Clear();
             Session.Abandon();
-            Application["LoggedIn"] = (int)Application["LoggedIn"] - 1;
             Response.Redirect("/Index.aspx");
         }
         protected void btnLogout_Click(object sender, EventArgs e)
