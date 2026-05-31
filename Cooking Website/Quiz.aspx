@@ -13,6 +13,7 @@
         </div>
 
         <asp:Button runat="server" OnClick="startBtn_Click" CssClass="start-btn" Text="Start" />
+        <%-- Server sets this to "true" after start; client reads it to restore the visible quiz state on postback --%>
         <input type="hidden" runat="server" id="restoreQuizState" value="false" />
         <!-- Quiz section -->
         <section id="quizSection">
@@ -35,10 +36,11 @@
             </div>
             <% } %>
         </section>
-        <asp:Button runat="server" OnClick="submitBtn_Click" OnClientClick="return onSubmit()" Text="Send" CssClass="submit-btn" />
+        <asp:Button runat="server" OnClick="submitBtn_Click" OnClientClick="return onSubmit()" Text="Send" CssClass="submit-btn btn" />
         <span id="msg"></span>
 
         <script>
+            <%-- Inline variables read by quiz.js before the defer'd script runs --%>
             const questionsCount = <%= questions.Count %>;
             const restore = document.getElementById("<%= restoreQuizState.ClientID %>").value;
         </script>

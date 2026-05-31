@@ -7,9 +7,10 @@ namespace Cooking_Website
     public partial class QuizResults : System.Web.UI.Page
     {
         protected List<QuizQuestion> questions;
+        // Reads quiz results and questions from session, calculates score, and renders the SVG progress ring
         protected void Page_Load(object sender, EventArgs e)
         {
-            if (Session["QuizResults"] == null)
+            if (Session["QuizResults"] == null || Session["Questions"] == null || Session["QuizTimer"] == null)
             {
                 Response.Redirect("/Quiz.aspx");
                 return;
@@ -32,7 +33,7 @@ namespace Cooking_Website
                     wrongCount++;
                 }
 
-            // Calculate progress bar
+            // Compute the stroke-dashoffset so the arc fills proportionally to the score
             double circumference = 2 * Math.PI * double.Parse(progressFill.Attributes["r"]);
             double offset = circumference - (circumference * (score / 100));
             progressFill.Attributes["style"] = $"stroke-dashoffset: {offset};";

@@ -1,265 +1,215 @@
-﻿const fields = ['username', 'birthday', 'gender', 'skill'];
-let editing = false;
+﻿/* ============================================================
+   profile.js — inline edit/view toggle and validation for the
+   Profile page. No page reload on save; updated values are
+   written back to the view elements directly.
+   ============================================================ */
 
-// Clears all field errors on the page.
+
+/* ── 1. UTILITIES ────────────────────────────────────────────── */
+
+// Displays an error message for a field; toggles the 'visible' CSS class
+function showError(id, msg) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = msg;
+    el.classList.add('visible');
+}
+
+// Hides the error element for the given field id
+function clearError(id) {
+    const el = document.getElementById(id);
+    if (el) el.classList.remove('visible');
+}
+
+// Hides all field-error elements on the page at once
 function clearErrors() {
     document.querySelectorAll('.field-error').forEach(el => el.classList.remove('visible'));
 }
 
-// Clears a single field error by ID.
-function clearError(id) {
-    document.getElementById(id).classList.remove('visible');
-}
-
-// Shows an error message for a specific field by ID.
-function showError(id, message) {
-    const el = document.getElementById(id);
-    el.textContent = message;
-    el.classList.add('visible');
-}
-
-// Returns true if the password meets all requirements: 8+ chars, no spaces, upper and lowercase.
+// Password must be 8+ chars, no spaces, mixed case, allowed specials only
 function isValidPassword(pw) {
-    return pw.length >= 8 &&
-        !/\s/.test(pw) &&
-        /[A-Z]/.test(pw) &&
-        /[a-z]/.test(pw);
+    return pw.length >= 8 && !/\s/.test(pw) && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && !/[^a-zA-Z0-9!*@_$#]/.test(pw);
 }
 
-// Capitalizes the first letter of a string and lowercases the rest.
+// Uppercases the first character and lowercases the rest
 function capitalize(str) {
     return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
 
-// Toggles the form between read-only and edit mode.
-function toggleEdit() {
-    editing = !editing;
 
-    fields.forEach(f => {
-        document.getElementById('view-' + f).style.display = editing ? 'none' : 'flex';
-        document.getElementById('edit-' + f).style.display = editing ? 'block' : 'none';
+/* ── 2. MODE SWITCHING ───────────────────────────────────────── */
+
+let editing = false;
+
+/*
+  Toggle all view/edit element pairs at once.
+  Any element with id starting "view-" has a matching "edit-" counterpart.
+  Both are selected in one pass rather than a manual list.
+*/
+function setMode(isEditing) {
+    editing = isEditing;
+
+    document.querySelectorAll('[id^="view-"]').forEach(function (viewEl) {
+        const key = viewEl.id.replace('view-', '');
+        const editEl = document.getElementById('edit-' + key);
+        if (!editEl) return;
+        viewEl.style.display = isEditing ? 'none' : '';
+        editEl.style.display = isEditing ? '' : 'none';
     });
 
-    document.getElementById('view-cuisine').style.display = editing ? 'none' : 'flex';
-    document.getElementById('edit-cuisine').style.display = editing ? 'flex' : 'none';
-
-    document.getElementById('view-password').style.display = editing ? 'none' : 'flex';
-    document.getElementById('edit-password-group').style.display = editing ? 'flex' : 'none';
-
-    document.querySelector('.server-message').style.display = editing ? 'none' : 'block';
-
-    clearErrors();
-    document.getElementById('card-footer').classList.toggle('visible', editing);
+    // Footer, button label, server message
+    document.getElementById('card-footer').classList.toggle('visible', isEditing);
     const btn = document.getElementById('toggle-btn');
-    btn.textContent = editing ? 'Editing...' : 'Edit';
-    btn.classList.toggle('active', editing);
+    btn.textContent = isEditing ? 'Editing...' : 'Edit';
+    btn.classList.toggle('active', isEditing);
+    document.querySelector('.server-message').style.display = isEditing ? 'none' : '';
+
+    if (!isEditing) {
+        // Clear password fields when leaving edit mode
+        ['edit-current-password', 'edit-new-password', 'edit-confirm-password']
+            .forEach(id => { document.getElementById(id).value = ''; });
+        clearErrors();
+    }
 }
 
-// Closes edit mode and resets the form back to read-only state.
-function cancelEdit() {
-    editing = false;
+function toggleEdit() { setMode(!editing); }
+function cancelEdit() { setMode(false); }
 
-    fields.forEach(f => {
-        document.getElementById('view-' + f).style.display = 'flex';
-        document.getElementById('edit-' + f).style.display = 'none';
-    });
 
-    document.getElementById('view-cuisine').style.display = 'flex';
-    document.getElementById('edit-cuisine').style.display = 'none';
-    document.getElementById('view-password').style.display = 'flex';
-    document.getElementById('edit-password-group').style.display = 'none';
+/* ── 3. INDIVIDUAL VALIDATORS ────────────────────────────────── */
 
-    document.getElementById('edit-current-password').value = '';
-    document.getElementById('edit-new-password').value = '';
-    document.getElementById('edit-confirm-password').value = '';
-
-    document.querySelector('.server-message').style.display = 'none';
-
-    clearErrors();
-    document.getElementById('card-footer').classList.remove('visible');
-    const btn = document.getElementById('toggle-btn');
-    btn.textContent = 'Edit';
-    btn.classList.remove('active');
+// Validates username: min 4 chars, no spaces, alphanumeric only
+function validateUsername() {
+    const val = document.getElementById('edit-username').value.trim();
+    if (val.length < 4) return showError('error-username', 'Username must be at least 4 characters.'), false;
+    if (/\s/.test(val)) return showError('error-username', 'Username cannot contain spaces.'), false;
+    if (/[^a-zA-Z0-9]/.test(val)) return showError('error-username', "Username can't have special characters."), false;
+    clearError('error-username');
+    return true;
 }
 
-// Validates, applies changes to the view, and returns true/false to control postback.
+// Validates the password change flow; all three fields blank means "don't change password"
+function validatePassword() {
+    const current = document.getElementById('edit-current-password').value;
+    const next = document.getElementById('edit-new-password').value;
+    const confirm = document.getElementById('edit-confirm-password').value;
+
+    // All blank = not changing password = valid
+    if (!current && !next && !confirm) return true;
+
+    let ok = true;
+    if (!isValidPassword(current)) { showError('error-current-password', 'At least 8 chars, no spaces, upper and lowercase.'); ok = false; }
+    else clearError('error-current-password');
+
+    if (!next) { showError('error-new-password', 'Please enter a new password.'); ok = false; }
+    else if (!isValidPassword(next)) { showError('error-new-password', 'At least 8 chars, no spaces, upper and lowercase.'); ok = false; }
+    else if (next === current) { showError('error-new-password', 'New password must differ from current.'); ok = false; }
+    else clearError('error-new-password');
+
+    if (!confirm) { showError('error-confirm-password', 'Please confirm your new password.'); ok = false; }
+    else if (confirm !== next) { showError('error-confirm-password', 'Passwords do not match.'); ok = false; }
+    else clearError('error-confirm-password');
+
+    return ok;
+}
+
+// Validates birthday: required, age must be between 12 and 120
+function validateBirthday() {
+    const val = document.getElementById('edit-birthday').value;
+    if (!val) return showError('error-birthday', 'Please enter your birthday.'), false;
+    const minAge = new Date();
+    minAge.setFullYear(minAge.getFullYear() - 12);
+    const maxAge = new Date();
+    maxAge.setFullYear(maxAge.getFullYear() - 120)
+    if (new Date(val) > minAge || new Date(val) < maxAge) return showError('error-birthday', 'Your age has to be between 12 and 120 years old.'), false;
+    clearError('error-birthday');
+    return true;
+}
+
+// Validates that a gender option is selected
+function validateGender() {
+    const val = document.getElementById('edit-gender').value;
+    if (!val) return showError('error-gender', 'Please select a gender.'), false;
+    clearError('error-gender');
+    return true;
+}
+
+// Validates that at least one cuisine preference checkbox is checked
+function validateCuisine() {
+    const checked = document.querySelectorAll('#edit-cuisine input:checked').length;
+    if (!checked) return showError('error-cuisine', 'Please select at least one cuisine.'), false;
+    clearError('error-cuisine');
+    return true;
+}
+
+// Validates that a skill level is selected
+function validateSkill() {
+    const val = document.getElementById('edit-skill').value;
+    if (!val) return showError('error-skill', 'Please select a skill level.'), false;
+    clearError('error-skill');
+    return true;
+}
+
+
+/* ── 4. SAVE — validate then update the view ─────────────────── */
+
+// Runs all validators; on success, updates view elements in place and returns true for form submit
 function saveEdit() {
     clearErrors();
-    let valid = true;
 
+    // bitwise and to go through all functions regardless of their result
+    const ok = validateUsername()
+        & validatePassword()
+        & validateBirthday()
+        & validateGender()
+        & validateCuisine()
+        & validateSkill();
+
+    if (!ok) return false;
+
+    // Update visible view elements to reflect the new values
     const un = document.getElementById('edit-username').value.trim();
-    if (un.length < 4) {
-        showError('error-username', 'Username must be at least 4 characters.');
-        valid = false;
-    } else if (/\s/.test(un)) {
-        showError('error-username', 'Username cannot contain spaces.');
-        valid = false;
-    }
-
-    const currentPw = document.getElementById('edit-current-password').value;
-    const newPw = document.getElementById('edit-new-password').value;
-    const confirmPw = document.getElementById('edit-confirm-password').value;
-
-    if (currentPw) {
-        if (!isValidPassword(currentPw)) {
-            showError('error-current-password', 'Password must be at least 8 characters, no spaces, with upper and lowercase letters.');
-            valid = false;
-        }
-        if (!newPw) {
-            showError('error-new-password', 'Please enter a new password.');
-            valid = false;
-        } else if (!isValidPassword(newPw)) {
-            showError('error-new-password', 'Password must be at least 8 characters, no spaces, with upper and lowercase letters.');
-            valid = false;
-        } else if (newPw === currentPw) {
-            showError('error-new-password', 'New password must be different from current password.');
-            valid = false;
-        }
-        if (!confirmPw) {
-            showError('error-confirm-password', 'Please confirm your new password.');
-            valid = false;
-        } else if (newPw !== confirmPw) {
-            showError('error-confirm-password', 'Passwords do not match.');
-            valid = false;
-        }
-    }
-
     const bd = document.getElementById('edit-birthday').value;
-    if (!bd) {
-        showError('error-birthday', 'Please enter your birthday.');
-        valid = false;
-    } else {
-        const bdDate = new Date(bd + 'T00:00:00');
-        const minAge = new Date();
-        minAge.setFullYear(minAge.getFullYear() - 12);
-        if (bdDate > minAge) {
-            showError('error-birthday', 'You must be at least 12 years old.');
-            valid = false;
-        }
-    }
-
     const gender = document.getElementById('edit-gender').value;
-    if (!gender) {
-        showError('error-gender', 'Please select a gender.');
-        valid = false;
-    }
-
-    const checked = [...document.querySelectorAll('#edit-cuisine input:checked')].map(cb => cb.value);
-    if (checked.length === 0) {
-        showError('error-cuisine', 'Please select at least one cuisine.');
-        valid = false;
-    }
-
     const skill = document.getElementById('edit-skill').value;
-    if (!skill) {
-        showError('error-skill', 'Please select a skill level.');
-        valid = false;
-    }
-
-    if (!valid) return false;
+    const checked = [...document.querySelectorAll('#edit-cuisine input:checked')].map(cb => cb.value);
+    const [y, m, d] = bd.split('-');
 
     document.getElementById('view-username').textContent = un;
     document.getElementById('header-username').textContent = '@' + un;
     document.getElementById('avatar-initials').textContent = un.slice(0, 2).toUpperCase();
-
-    const [year, month, day] = bd.split('-');
-    document.getElementById('view-birthday').textContent = `${day}/${month}/${year}`;
-
+    document.getElementById('view-birthday').textContent = `${d}/${m}/${y}`;
     document.getElementById('view-gender').textContent = capitalize(gender);
     document.getElementById('view-skill').textContent = capitalize(skill);
-
-    const pillsContainer = document.getElementById('view-cuisine');
-    pillsContainer.innerHTML = checked.map(c => `<span class="multi-pill">${capitalize(c)}</span>`).join('');
+    document.getElementById('view-cuisine').innerHTML = checked.map(c => `<span class="multi-pill">${capitalize(c)}</span>`).join('');
 
     return true;
 }
 
-// Live validation — username format.
-document.getElementById('edit-username').addEventListener('input', function () {
-    const val = this.value.trim();
-    if (val.length < 4) {
-        showError('error-username', 'Username must be at least 4 characters.');
-    } else if (/\s/.test(val)) {
-        showError('error-username', 'Username cannot contain spaces.');
-    } else {
-        clearError('error-username');
-    }
+
+/* ── 5. LIVE VALIDATION — single delegated listener ─────────── */
+
+/*
+  One listener on the card body handles all field validation as the user
+  types, instead of one addEventListener call per field.
+*/
+document.querySelector('.card-body').addEventListener('input', function (e) {
+    const id = e.target.id;
+
+    if (id === 'edit-username') validateUsername();
+    if (id === 'edit-current-password' ||
+        id === 'edit-new-password' ||
+        id === 'edit-confirm-password') validatePassword();
+    if (id === 'edit-birthday') validateBirthday();
 });
 
-// Live validation — current password; clears entire group if emptied.
-document.getElementById('edit-current-password').addEventListener('input', function () {
-    if (!this.value) {
-        clearError('error-current-password');
-        clearError('error-new-password');
-        clearError('error-confirm-password');
-        return;
-    }
-    if (!isValidPassword(this.value)) {
-        showError('error-current-password', 'Password must be at least 8 characters, no spaces, with upper and lowercase letters.');
-    } else {
-        clearError('error-current-password');
-    }
-});
+document.querySelector('.card-body').addEventListener('change', function (e) {
+    const id = e.target.id;
 
-// Live validation — new password; also re-evaluates confirm if already filled.
-document.getElementById('edit-new-password').addEventListener('input', function () {
-    const currentPw = document.getElementById('edit-current-password').value;
-    if (!currentPw) return;
+    if (id === 'edit-birthday') validateBirthday();
+    if (id === 'edit-gender') validateGender();
+    if (id === 'edit-skill') validateSkill();
 
-    if (!this.value) {
-        showError('error-new-password', 'Please enter a new password.');
-    } else if (!isValidPassword(this.value)) {
-        showError('error-new-password', 'Password must be at least 8 characters, no spaces, with upper and lowercase letters.');
-    } else if (this.value === currentPw) {
-        showError('error-new-password', 'New password must be different from current password.');
-    } else {
-        clearError('error-new-password');
-    }
-    const confirm = document.getElementById('edit-confirm-password').value;
-    if (confirm) {
-        if (this.value !== confirm) {
-            showError('error-confirm-password', 'Passwords do not match.');
-        } else {
-            clearError('error-confirm-password');
-        }
-    }
-});
-
-// Live validation — confirm password match.
-document.getElementById('edit-confirm-password').addEventListener('input', function () {
-    const currentPw = document.getElementById('edit-current-password').value;
-    if (!currentPw) return;
-
-    const newPw = document.getElementById('edit-new-password').value;
-    if (!this.value) {
-        showError('error-confirm-password', 'Please confirm your new password.');
-    } else if (this.value !== newPw) {
-        showError('error-confirm-password', 'Passwords do not match.');
-    } else {
-        clearError('error-confirm-password');
-    }
-});
-
-// Live validation — birthday age check.
-document.getElementById('edit-birthday').addEventListener('change', function () {
-    const bd = new Date(this.value + 'T00:00:00');
-    const minAge = new Date();
-    minAge.setFullYear(minAge.getFullYear() - 12);
-    if (!this.value) {
-        showError('error-birthday', 'Please enter your birthday.');
-    } else if (bd > minAge) {
-        showError('error-birthday', 'You must be at least 12 years old.');
-    } else {
-        clearError('error-birthday');
-    }
-});
-
-// Live validation — at least one cuisine checked.
-document.getElementById('edit-cuisine').addEventListener('change', function () {
-    const checked = [...this.querySelectorAll('input:checked')];
-    if (checked.length > 0) {
-        clearError('error-cuisine');
-    } else {
-        showError('error-cuisine', 'Please select at least one cuisine.');
-    }
+    // Cuisine checkboxes — any checkbox inside #edit-cuisine
+    if (e.target.closest('#edit-cuisine')) validateCuisine();
 });

@@ -20,6 +20,7 @@
 
             <div class="card-body">
 
+                <%-- Each field has a view element and a matching edit element; profile.js toggles between them --%>
                 <div class="field-row">
                     <span class="field-label">Username</span>
                     <div class="field-value" id="view-username"><%= Session["Username"] %></div>
@@ -30,7 +31,7 @@
                 <div class="field-row">
                     <span class="field-label">Password</span>
                     <div class="field-value password-dots" id="view-password">••••••••</div>
-                    <div id="edit-password-group" style="display: none; flex-direction: column; gap: 8px;">
+                    <div id="edit-password" style="display: none; flex-direction: column; gap: 8px;">
                         <input class="field-input" id="edit-current-password" name="currentPassword" type="password" placeholder="Current password">
                         <span class="field-error" id="error-current-password"></span>
                         <input class="field-input" id="edit-new-password" name="newPassword" type="password" placeholder="New password">
@@ -42,6 +43,7 @@
 
                 <div class="divider"></div>
 
+                <%-- Parse Birthday once so both view (dd/MM/yyyy) and edit (yyyy-MM-dd) can use it --%>
                 <% DateTime birthday = DateTime.Parse(profileInfo["Birthday"].ToString()); %>
                 <div class="field-row">
                     <span class="field-label">Birthday</span>
@@ -70,7 +72,7 @@
 
                 <%
                     string[] cuisines = (string[])profileInfo["Cuisine"];
-                    string[] cuisineOptions = { "italian", "japanese", "mexican", "indian", "french", "chinese", "thai", "mediterranean", "american", "other" };
+                    string[] cuisineOptions = { "italian", "japanese", "mexican", "indian", "french", "chinese", "mediterranean", "american", "other" };
                 %>
                 <div class="field-row">
                     <span class="field-label">Favorite Cuisine</span>
@@ -111,6 +113,7 @@
 
             <div class="card-footer" id="card-footer">
                 <button type="button" class="cancel-btn" onclick="cancelEdit()">Cancel</button>
+                <%-- saveEdit() runs client-side validation first; returns false to abort the postback on error --%>
                 <asp:Button ID="saveBtn" runat="server" Text="Save Changes" CssClass="save-confirm-btn" OnClick="saveBtn_Click" OnClientClick="return saveEdit()" />
             </div>
         </div>

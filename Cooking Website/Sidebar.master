@@ -1,4 +1,6 @@
-﻿<%@ Master Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="Sidebar.master.cs" Inherits="Cooking_Website.Sidebar" %>
+﻿<%-- Sidebar.master — nested master page that adds a two-column layout (sidebar nav + content area).
+     Used as the MasterPageFile for Admin, Guides, and Utilities sections. --%>
+<%@ Master Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="Sidebar.master.cs" Inherits="Cooking_Website.Sidebar" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="Head" runat="server">
     <link rel="stylesheet" href="/css/inner.css" />

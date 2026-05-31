@@ -10,6 +10,8 @@ namespace Cooking_Website
     {
         protected List<QuizQuestion> questions;
 
+        // On first load: shuffles question and answer order, caches in session.
+        // On postback: restores the same order from session so answers still map correctly.
         protected void Page_Load(object sender, EventArgs e)
         {
             if (Session["Id"] == null)
@@ -20,15 +22,22 @@ namespace Cooking_Website
 
             if (!IsPostBack)
             {
-                // Load, shuffle and store in session
                 questions = QuizHelper.LoadQuizQuestions()
-                    .OrderBy(q => Guid.NewGuid())
-                    .Select(q =>
-                    {
-                        q.Answers = q.Answers.OrderBy(a => Guid.NewGuid()).ToList();
-                        return q;
-                    })
-                    .ToList();
+                .OrderBy(q => Guid.NewGuid())
+                .Select(q =>
+                {
+                    // Save the correct answer text before the shuffle moves it
+                    string correctAnswerText = q.Answers[q.Correct];
+
+                    // Shuffle
+                    q.Answers = q.Answers.OrderBy(a => Guid.NewGuid()).ToList();
+
+                    // Update Correct to wherever that text ended up after shuffling
+                    q.Correct = q.Answers.IndexOf(correctAnswerText);
+
+                    return q;
+                })
+                .ToList();
                 Session["Questions"] = questions;
             }
             else
@@ -38,6 +47,7 @@ namespace Cooking_Website
             }
         }
 
+        // Records quiz start time and signals the client to restore the visible quiz state after postback
         protected void startBtn_Click(object sender, EventArgs e)
         {
             Session["QuizStart"] = DateTime.Now; // store start time
@@ -47,6 +57,7 @@ namespace Cooking_Website
             restoreQuizState.Value = "true";
         }
 
+        // Scores all answers, records elapsed time, then redirects to QuizResults
         protected void submitBtn_Click(object sender, EventArgs e)
         {
             Dictionary<int, bool> quizResults = new Dictionary<int, bool>();

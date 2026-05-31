@@ -2,6 +2,7 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <link rel="stylesheet" href="/css/recipes.css" />
+    <%-- Pass the mangled ASP.NET control IDs to JS before the defer'd script loads --%>
     <script type="text/javascript">
         var RecipesConfig = {
             hiddenDifficultyId: "<%= HiddenDifficulty.ClientID %>",
@@ -108,7 +109,8 @@
                             <h2 class="card-title"><%# Eval("Title") %></h2>
                             <p class="card-description"><%# Eval("Description") %></p>
                             <div class="card-footer">
-                                <span class="card-time">&#9201; <%# (int)Eval("PrepTime") + (int)Eval("CookTime") %> min</span>
+                                <%-- Total time = prep + cook combined --%>
+                    <span class="card-time">&#9201; <%# (int)Eval("PrepTime") + (int)Eval("CookTime") %> min</span>
                                 <span class="card-servings">&#9787; <%# Eval("Servings") %> servings</span>
                             </div>
                         </div>

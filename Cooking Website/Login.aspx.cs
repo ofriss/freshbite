@@ -1,7 +1,5 @@
-﻿using Cooking_Website.Security;
+﻿using Cooking_Website.DAL;
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Cooking_Website
 {
@@ -9,6 +7,7 @@ namespace Cooking_Website
     {
         string username, password;
 
+        // On postback: validates credentials, sets session vars, increments LoggedIn counter, then redirects
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!IsPostBack)
@@ -25,7 +24,7 @@ namespace Cooking_Website
                 return;
             }
 
-            if (SqlHelper.CheckCredentials(username, password, out int id))
+            if (UsersRepository.CheckCredentials(username, password, out int id))
             {
                 Session["Id"] = id;
                 Session["Username"] = username;
@@ -41,37 +40,17 @@ namespace Cooking_Website
             }
         }
 
+        // Server-side presence check only; strength rules are enforced on the client
         private string ValidateForm()
         {
+            username = username?.Trim();
+            password = password?.Trim();
+
             if (string.IsNullOrWhiteSpace(username))
                 return "Username is missing.";
 
-            if (username.Length < 6)
-                return "Username is too short.";
-
-            if (username.Contains(" "))
-                return "Username can't have spaces.";
-
-            if (Regex.IsMatch(username, @"[^a-zA-Z0-9]"))
-                return "Username can't have special characters.";
-
             if (string.IsNullOrWhiteSpace(password))
                 return "Password is missing.";
-
-            if (password.Length < 8)
-                return "Password is too short.";
-
-            if (password.Contains(" "))
-                return "Password can't have spaces.";
-
-            if (!password.Any(char.IsLower) || !password.Any(char.IsUpper))
-                return "Password must have upper and lower letters.";
-
-            if (Regex.IsMatch(password, @"[^a-zA-Z0-9]"))
-                return "Password can't have special characters.";
-
-            username = username.Trim();
-            password = password.Trim();
 
             return null;
         }

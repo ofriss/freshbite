@@ -1,17 +1,18 @@
-﻿using Cooking_Website.Security;
+﻿using Cooking_Website.Helpers;
 using System;
 using System.Data;
 using System.Data.SqlClient;
+using System.Web;
 
 namespace Cooking_Website.Admin
 {
     public partial class ViewUsers : System.Web.UI.Page
     {
+        // Loads all users and renders them as an HTML table; Password column is intentionally excluded
         protected void Page_Load(object sender, EventArgs e)
         {
             string connStr = SqlHelper.LoadConnectionString();
 
-            // Load data to 
             DataSet ds;
             try
             {
@@ -24,7 +25,7 @@ namespace Cooking_Website.Admin
                     da.Fill(ds);
                 }
             }
-            catch (Exception ex)
+            catch
             {
                 errorMsg.Text = "Something went wrong while reading db.";
                 return;
@@ -50,7 +51,7 @@ namespace Cooking_Website.Admin
                     {
                         continue;
                     }
-                    str += $"<td>{row[column]}</td>";
+                    str += $"<td>{HttpUtility.HtmlEncode(row[column].ToString())}</td>";
                 }
                 str += "</tr>";
             }

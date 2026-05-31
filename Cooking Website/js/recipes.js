@@ -1,4 +1,7 @@
-﻿/* ── 1. REFERENCES ───────────────────────────────────────────── */
+﻿// recipes.js — client-side filtering, "For You" badges, and filter state persistence
+// for the Recipes listing page. User profile data is injected via hidden fields.
+
+/* ── 1. REFERENCES ───────────────────────────────────────────── */
 
 const cards = document.querySelectorAll(".recipe-card");
 const emptyState = document.getElementById("recipes-empty");
@@ -34,6 +37,7 @@ let activeCuisines = new Set();   // empty = All
 
 const difficultyRank = { "Easy": 1, "Medium": 2, "Hard": 3 };
 
+// Stamps "For You" badges on cards matching the logged-in user's skill and cuisine preferences
 function applyForYouBadges() {
     if (!isLoggedIn) return;
 
@@ -64,6 +68,7 @@ function applyForYouBadges() {
 
 /* ── 5. CORE FILTER FUNCTION ─────────────────────────────────── */
 
+// Shows/hides recipe cards based on all three active filter dimensions
 function applyFilters() {
     let visibleCount = 0;
 
@@ -88,6 +93,7 @@ function applyFilters() {
 
 /* ── 6. SINGLE-SELECT HANDLER (Difficulty + Category) ───────── */
 
+// Wires up mutually-exclusive filter buttons (difficulty and category)
 function bindSingleSelect(filterType, onSelect) {
     const btns = document.querySelectorAll("[data-filter-type='" + filterType + "']");
 
@@ -109,6 +115,7 @@ bindSingleSelect("category", function (val) { activeCategory = val; });
 
 const cuisineBtns = document.querySelectorAll("[data-filter-type='cuisine']");
 
+// Keeps cuisine button active states in sync with the activeCuisines Set
 function syncCuisineButtons() {
     cuisineBtns.forEach(function (btn) {
         const val = btn.getAttribute("data-filter");
@@ -161,6 +168,7 @@ if (guestClose && guestBanner) {
 
 /* ── 10. FILTER STATE PERSISTENCE ───────────────────────────── */
 
+// Serialises current filter state to sessionStorage so Recipe.aspx can restore it on back-navigate
 function saveFilterState() {
     var params = new URLSearchParams();
 

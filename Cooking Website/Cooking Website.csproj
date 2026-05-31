@@ -88,6 +88,7 @@
     <Content Include="css\recipe.css" />
     <Content Include="css\recipes.css" />
     <Content Include="css\styles.css" />
+    <Content Include="css\substitutions.css" />
     <Content Include="css\timer.css" />
     <Content Include="css\tips.css" />
     <Content Include="css\units-calculator.css" />
@@ -104,6 +105,7 @@
     <Content Include="js\recipe.js" />
     <Content Include="js\recipes.js" />
     <Content Include="js\register.js" />
+    <Content Include="js\substitutions.js" />
     <Content Include="js\timer.js" />
     <Content Include="js\units-calculator.js" />
     <Content Include="Login.aspx" />
@@ -118,6 +120,7 @@
     <Content Include="Register.aspx" />
     <Content Include="Guides\SaucesGuide.aspx" />
     <Content Include="Guides\SoupsGuide.aspx" />
+    <Content Include="Utilities\Substitutions.aspx" />
     <Content Include="Utilities\Timer.aspx" />
     <Content Include="Tips.aspx" />
     <Content Include="Utilities\UnitsCalculator.aspx" />
@@ -153,6 +156,7 @@
     <Compile Include="Admin\ViewUsers.aspx.designer.cs">
       <DependentUpon>ViewUsers.aspx</DependentUpon>
     </Compile>
+    <Compile Include="DAL\UsersRepository.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -299,6 +303,13 @@
     </Compile>
     <Compile Include="Guides\SoupsGuide.aspx.designer.cs">
       <DependentUpon>SoupsGuide.aspx</DependentUpon>
+    </Compile>
+    <Compile Include="Utilities\Substitutions.aspx.cs">
+      <DependentUpon>Substitutions.aspx</DependentUpon>
+      <SubType>ASPXCodeBehind</SubType>
+    </Compile>
+    <Compile Include="Utilities\Substitutions.aspx.designer.cs">
+      <DependentUpon>Substitutions.aspx</DependentUpon>
     </Compile>
     <Compile Include="Utilities\Timer.aspx.cs">
       <DependentUpon>Timer.aspx</DependentUpon>

@@ -8,6 +8,7 @@
 
 <asp:Content ID="Content3" ContentPlaceHolderID="Head" runat="server">
     <link rel="stylesheet" href="/css/form.css" />
+    <%-- Pass mangled ASP.NET control IDs to manage-users.js before the defer'd script loads --%>
     <script type="text/javascript">
         var ManageUsersConfig = {
             hiddenUserIdId: "<%= HiddenUserId.ClientID %>",

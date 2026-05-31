@@ -1,4 +1,7 @@
-﻿/* ── 1. REFERENCES ───────────────────────────────────────────── */
+﻿// recipe.js — servings scaler, ingredient checkbox persistence, and back-button
+// filter restoration for the individual Recipe detail page.
+
+/* ── 1. REFERENCES ───────────────────────────────────────────── */
 
 const backBtn = document.getElementById("back-btn");
 const scalerMinus = document.getElementById("scaler-minus");
@@ -36,6 +39,7 @@ if (backBtn) {
 
 /* ── 3. QUANTITY PARSER ──────────────────────────────────────── */
 
+// Parses a quantity string into a float, supporting integers, decimals, fractions and mixed numbers
 function parseQuantity(str) {
     if (!str) return null;
 
@@ -67,6 +71,7 @@ function parseQuantity(str) {
 
 /* ── 4. QUANTITY FORMATTER ───────────────────────────────────── */
 
+// Formats a float back to a human-readable fraction/mixed-number string where possible
 function formatQuantity(num) {
     if (num === Math.floor(num)) {
         // Whole number
@@ -103,11 +108,13 @@ var currentServings = RecipeConfig.defaultServings;
 var minServings = 1;
 var maxServings = 100;
 
+// Enables/disables +/- buttons at the min/max serving boundaries
 function updateScalerButtons() {
     scalerMinus.disabled = currentServings <= minServings;
     scalerPlus.disabled = currentServings >= maxServings;
 }
 
+// Rescales all ingredient quantities to the current serving count using the original data-attribute values
 function scaleIngredients() {
     var ratio = currentServings / RecipeConfig.defaultServings;
 
@@ -147,6 +154,7 @@ if (scalerPlus) {
 
 /* ── 6. INGREDIENT CHECKBOXES ────────────────────────────────── */
 
+// Restores ingredient check marks from sessionStorage on page load
 function loadCheckedState() {
     var saved = sessionStorage.getItem(STORAGE_KEY_CHECKS);
     if (!saved) return;
@@ -161,6 +169,7 @@ function loadCheckedState() {
     });
 }
 
+// Persists the checked ingredient indexes to sessionStorage by position, not by text
 function saveCheckedState() {
     var items = ingredientList.querySelectorAll(".ingredient-item");
     var checked = [];

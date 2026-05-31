@@ -11,6 +11,7 @@
             </tr>
         </thead>
         <tbody>
+            <%-- Application-level counters managed by Global.asax.cs --%>
             <tr>
                 <td>Online</td>
                 <td><%=Application["Online"] %></td>

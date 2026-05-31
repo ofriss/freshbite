@@ -9,7 +9,8 @@
     <!-- ── Hero ── -->
     <section class="hero">
         <div class="hero-text">
-            <h2 class="hero-eyebrow">Welcome<% if (Session["Id"] != null) Response.Write($", {Session["Username"]}"); %>!</h2>
+            <%-- Personalise the greeting with the username when a user is logged in --%>
+        <h2 class="hero-eyebrow">Welcome<% if (Session["Id"] != null) Response.Write($", {Session["Username"]}"); %>!</h2>
             <h1>FreshBite</h1>
             <p>Discover easy recipes and cooking tips that make every meal better.</p>
             <a href="Recipes.aspx" class="btn">Explore Recipes</a>
@@ -42,7 +43,7 @@
         </div>
     </section>
 
-    <!-- ── Call to Action (guests only) ── -->
+    <!-- ── Call to Action (guests only) — hidden for logged-in users ── -->
     <% if (Session["Id"] == null) { %>
     <section class="cta-strip">
         <div class="cta-text">

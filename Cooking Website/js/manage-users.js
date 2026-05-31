@@ -1,5 +1,8 @@
 ﻿/* ============================================================
-   manage-users.js
+   manage-users.js — admin panel for creating, editing, and
+   deleting users. Communicates with the codebehind by writing
+   values into hidden form fields and triggering hidden ASP.NET
+   buttons (btnCreate, btnEdit, btnDelete) via .click().
 
    Follows the exact same pattern as register.js:
      - els object, setMsg, requireCondition
@@ -68,13 +71,15 @@ function hasLowerAndUpper(s) {
 
 /* ── 3. VALIDATORS (same pattern as register.js) ─────────────── */
 
+// Validates username: min 4 chars, no spaces, alphanumeric only
 function checkName() {
     const val = (els.username.value || '').trim();
-    if (!requireCondition(val.length >= 6, els.usernameMsg, 'Username too short.')) return false;
+    if (!requireCondition(val.length >= 4, els.usernameMsg, 'Username too short.')) return false;
     if (!requireCondition(!/\s/.test(val), els.usernameMsg, 'No spaces allowed.')) return false;
+    if (!requireCondition(!/[^a-zA-Z0-9]/.test(val), els.usernameMsg, 'No special characters allowed.')) return false;
     return true;
 }
-
+    
 function checkPassValidation() {
     // Edit mode with both fields blank = keep existing password = valid
     if (currentMode === 'edit' && !els.pwd.value && !els.pwdValid.value) {
@@ -99,39 +104,59 @@ function checkPass() {
     }
 
     checkPassValidation();
-    if (!requireCondition(!/\s/.test(val), els.pwdMsg, 'No spaces allowed.')) return false;
     if (!requireCondition(val.length >= 8, els.pwdMsg, 'Password too short.')) return false;
+    if (!requireCondition(!/\s/.test(val), els.pwdMsg, 'No spaces allowed.')) return false;
     if (!requireCondition(hasLowerAndUpper(val), els.pwdMsg, 'Must include upper & lower case.')) return false;
+    if (!requireCondition(!/[^a-zA-Z0-9!*@_$#]/.test(val), els.pwdMsg, "Password can't have special characters (other than !*@_$#).")) return false;
+
+    if (els.bday.value) {
+        const birthdayYear = new Date(els.bday.value).getFullYear();
+        if (!requireCondition(!val.includes(birthdayYear), els.pwdMsg, "Password can't have the birthday year in it.")) return false;
+    }
+
+    if (els.username.value) {
+        if (!requireCondition(!val.includes(els.username.value), els.usernameMsg, "Password can't have the username in it.")) return false;
+    }
+
     return true;
 }
 
-function isAtLeastAge(dateString, age) {
-    if (!dateString) return false;
-    const birth = new Date(dateString + 'T00:00:00');
+function calculateAge(birthdate) {
+    if (!birthdate) return 0;
     const today = new Date();
-    let years = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) years--;
-    return years >= age;
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) age--;
+    return age;
 }
 
+function ageInRange(birthdate, min, max) {
+    const age = calculateAge(birthdate);
+    return age >= min && age <= max;
+}
+
+// Validates birthday: required, age between 12 and 120
 function checkBirthday() {
     const val = els.bday.value;
     if (!requireCondition(!!val, els.bdayMsg, 'Birthday required.')) return false;
-    if (!requireCondition(isAtLeastAge(val, 12), els.bdayMsg, 'Must be at least 12.')) return false;
+    if (!requireCondition(ageInRange(val, 12, 120), els.bdayMsg, 'Age has to be above 12 and below 120.')) return false;
     return true;
 }
 
+// Validates that one gender radio is selected
 function checkGender() {
     const selected = document.querySelector('input[name="gender"]:checked');
     return requireCondition(!!selected, els.genderMsg, 'Select gender.');
 }
 
+// Validates that at least one cuisine is checked
 function checkCuisine() {
     const count = document.querySelectorAll('input[name="cuisine"]:checked').length;
     return requireCondition(count > 0, els.cuisineMsg, 'Select at least one cuisine.');
 }
 
+// Validates that a skill level is selected
 function checkSkill() {
     return requireCondition(!!els.skill.value, els.skillMsg, 'Select skill level.');
 }
@@ -139,6 +164,7 @@ function checkSkill() {
 
 /* ── 4. PANEL — OPEN / CLOSE ─────────────────────────────────── */
 
+// Resets the form, labels it for creation, and shows the panel
 function openCreate() {
     currentMode = 'create';
     formTitle.textContent = 'Create User';
@@ -149,6 +175,7 @@ function openCreate() {
     formPanel.hidden = false;
 }
 
+// Populates the form with the existing user's data and opens the panel in edit mode
 function openEdit(id, username, birthday, gender, cuisine, skill) {
     currentMode = 'edit';
     formTitle.textContent = 'Edit User';
@@ -173,6 +200,7 @@ function openEdit(id, username, birthday, gender, cuisine, skill) {
     formPanel.hidden = false;
 }
 
+// Hides the form panel and resets all fields and the hidden user ID
 function closePanel() {
     formPanel.hidden = true;
     hiddenId.value = 0;
@@ -186,6 +214,7 @@ formPanel.addEventListener('click', function (e) {
 
 /* ── 5. RESET ────────────────────────────────────────────────── */
 
+// Clears all form inputs and validation messages without touching select option lists
 function resetForm() {
     els.username.value = '';
     els.pwd.value = '';
@@ -194,12 +223,18 @@ function resetForm() {
     els.skill.value = '';
     document.querySelectorAll('input[name="gender"]').forEach(function (r) { r.checked = false; });
     document.querySelectorAll('input[name="cuisine"]').forEach(function (c) { c.checked = false; });
-    Object.values(els).forEach(function (el) { setMsg(el); });
+
+    // Only clear the message <div>s, not the input/select controls
+    // (clearing the skill <select> would wipe its <option> list).
+    [els.usernameMsg, els.pwdMsg, els.pwdValidMsg, els.bdayMsg,
+     els.genderMsg, els.cuisineMsg, els.skillMsg]
+        .forEach(function (el) { setMsg(el); });
 }
 
 
 /* ── 6. SUBMIT ───────────────────────────────────────────────── */
 
+// Validates the form, writes values to hidden fields, then triggers the appropriate ASP.NET button
 function onSubmit() {
     var ok = checkName() & checkPass() & checkPassValidation()
         & checkBirthday() & checkGender() & checkCuisine() & checkSkill();
@@ -246,6 +281,7 @@ function writeHidden(name, value) {
 
 /* ── 7. DELETE ───────────────────────────────────────────────── */
 
+// Stores the pending delete target and shows the confirmation panel
 function confirmDelete(id, username) {
     pendingDeleteId = id;
     document.getElementById('delete-confirm-msg').textContent =
@@ -253,12 +289,14 @@ function confirmDelete(id, username) {
     deletePanel.hidden = false;
 }
 
+// Writes the pending delete ID to the hidden field and triggers the delete button
 function submitDelete() {
     writeHidden('mu-id', pendingDeleteId);
     deletePanel.hidden = true;
     btnDelete.click();
 }
 
+// Cancels the pending delete and hides the confirmation panel
 function closeDeletePanel() {
     deletePanel.hidden = true;
     pendingDeleteId = 0;

@@ -2,8 +2,10 @@
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <link rel="stylesheet" href="/css/recipe.css" />
+    <%-- Config object is emitted before the defer'd script so recipe.js can access it immediately --%>
     <script type="text/javascript">
         var RecipeConfig = {
+            <%-- defaultServings seeds the JS scaler; falls back to 1 if CurrentRecipe is somehow null --%>
             defaultServings:    <%# CurrentRecipe != null ? CurrentRecipe.Servings : 1 %>,
             hiddenDifficultyId: "<%= HiddenDifficulty.ClientID %>",
             hiddenCuisinesId:   "<%= HiddenCuisines.ClientID %>"
@@ -80,7 +82,8 @@
                         <li class="ingredient-item">
                             <span class="ingredient-check" aria-hidden="true">&#10003;</span>
                             <span class="ingredient-text">
-                                <span class="ingredient-quantity"
+                                <%-- data-original stores the raw quantity so recipe.js can re-scale from the source value --%>
+                        <span class="ingredient-quantity"
                                     data-original='<%# Eval("Quantity") %>'><%# Eval("Quantity") %></span>
                                 <%# RenderUnit(Eval("Unit")) %>
                                 <span class="ingredient-name"><%# Eval("Name") %></span>

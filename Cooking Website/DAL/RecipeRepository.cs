@@ -1,12 +1,12 @@
-﻿using Cooking_Website.Security;
+﻿using Cooking_Website.Helpers;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Data;
 using System.Data.SqlClient;
 
 namespace Cooking_Website.DAL
 {
+    // Lightweight model for listing recipes (no related data)
     public class Recipe
     {
         public int Id { get; set; }
@@ -21,6 +21,7 @@ namespace Cooking_Website.DAL
         public string ImageUrl { get; set; }  // nullable
     }
 
+    // Full recipe including all related child collections
     public class RecipeDetail : Recipe
     {
         public List<Ingredient> Ingredients { get; set; }
@@ -35,24 +36,28 @@ namespace Cooking_Website.DAL
         public string Name { get; set; }
     }
 
+    // DAL for all recipe-related queries; mutations wrap child inserts in a transaction
     public class RecipeRepository
     {
         private readonly string _conn = SqlHelper.LoadConnectionString();
 
         // ── Helpers ──────────────────────────────────────────────
 
+        // Returns null for DB NULL strings rather than throwing on GetString
         private string SafeString(IDataReader r, string column)
         {
             int ordinal = r.GetOrdinal(column);
             return r.IsDBNull(ordinal) ? null : r.GetString(ordinal);
         }
 
+        // Returns 0 for DB NULL ints rather than throwing on GetInt32
         private int SafeInt(IDataReader r, string column)
         {
             int ordinal = r.GetOrdinal(column);
             return r.IsDBNull(ordinal) ? 0 : r.GetInt32(ordinal);
         }
 
+        // Maps the current reader row to a Recipe object
         private Recipe MapRecipe(IDataReader r)
         {
             return new Recipe
@@ -72,6 +77,7 @@ namespace Cooking_Website.DAL
 
         // ── Recipes ───────────────────────────────────────────────
 
+        // Returns all recipes ordered newest-first
         public List<Recipe> GetRecipes()
         {
             var list = new List<Recipe>();
@@ -89,6 +95,7 @@ namespace Cooking_Website.DAL
             return list;
         }
 
+        // Fetches a recipe with all ingredients, steps (ordered), and tips; returns null if not found
         public RecipeDetail GetRecipeById(int id)
         {
             RecipeDetail recipe = null;
@@ -169,6 +176,7 @@ namespace Cooking_Website.DAL
 
         // ── Filters ───────────────────────────────────────────────
 
+        // Returns distinct cuisines sorted alphabetically with "Other" always last
         public List<string> GetDistinctCuisines()
         {
             var list = new List<string>();
@@ -194,6 +202,7 @@ namespace Cooking_Website.DAL
 
         // ── Users ─────────────────────────────────────────────────
 
+        // Returns the user's skill as "Easy", "Medium", or "Hard"; normalises DB variants; null if unknown
         public string GetUserSkillLevel(int userId)
         {
             using (var con = new SqlConnection(_conn))
@@ -228,6 +237,7 @@ namespace Cooking_Website.DAL
             }
         }
 
+        // Returns the user's favourite cuisines as a list; parses the comma-delimited Cuisine column
         public List<string> GetUserFavouriteCuisines(int userId)
         {
             using (var con = new SqlConnection(_conn))
@@ -257,6 +267,7 @@ namespace Cooking_Website.DAL
 
         // ── Insert ────────────────────────────────────────────────
 
+        // Inserts a recipe and all its child rows in a single transaction; returns the new recipe ID
         public int InsertRecipe(RecipeDetail recipe)
         {
             using (var con = new SqlConnection(_conn))
@@ -342,6 +353,7 @@ namespace Cooking_Website.DAL
 
         // ── Update ────────────────────────────────────────────────
 
+        // Updates recipe header and replaces all child rows (delete + re-insert) in a single transaction
         public void UpdateRecipe(RecipeDetail recipe)
         {
             using (var con = new SqlConnection(_conn))
@@ -377,6 +389,7 @@ namespace Cooking_Website.DAL
                             (object)recipe.ImageUrl ?? DBNull.Value);
                         cmd.ExecuteNonQuery();
 
+                        // Replace all child rows rather than diffing — simpler and safe inside the transaction
                         foreach (var table in new[] { "RecipeIngredients", "RecipeSteps", "RecipeTips" })
                         {
                             var delCmd = new SqlCommand(

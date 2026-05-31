@@ -15,6 +15,7 @@
 <asp:Content ID="Content4" ContentPlaceHolderID="Nav" runat="server">
     <li><a href="/Utilities/UnitsCalculator.aspx">Calculator</a></li>
     <li><a href="/Utilities/Timer.aspx">Timer</a></li>
+    <li><a href="/Utilities/Substitutions.aspx">Substitutions</a></li>
 </asp:Content>
 
 <asp:Content ID="Content5" ContentPlaceHolderID="Body" runat="server">

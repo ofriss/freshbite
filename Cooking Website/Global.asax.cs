@@ -5,12 +5,14 @@ namespace Cooking_Website
     public class Global : System.Web.HttpApplication
     {
 
+        // Initialise application-wide counters to 0 on first startup
         protected void Application_Start(object sender, EventArgs e)
         {
             Application["Online"] = 0;
             Application["LoggedIn"] = 0;
         }
 
+        // Track every new visitor session, whether logged in or not
         protected void Session_Start(object sender, EventArgs e)
         {
             Application["Online"] = (int)Application["Online"] + 1;
@@ -31,6 +33,7 @@ namespace Cooking_Website
 
         }
 
+        // Decrement online count; only decrement LoggedIn if the session had an authenticated user
         protected void Session_End(object sender, EventArgs e)
         {
             Application["Online"] = (int)Application["Online"] - 1;

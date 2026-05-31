@@ -2,6 +2,7 @@
 
 <asp:Content ID="HeadContent" ContentPlaceHolderID="head" runat="server">
     <link rel="stylesheet" href="/css/form.css" />
+    <script src="/js/login.js" defer></script>
 </asp:Content>
 
 <asp:Content ID="BodyContent" ContentPlaceHolderID="body" runat="server">
@@ -18,6 +19,7 @@
         <input type="password" name="pwd" id="pwd" oninput="checkPass()" />
         <div id="pwd-msg" class="msg"></div>
 
+        <%-- onSubmit returns false on validation failure, preventing form submission --%>
         <input type="submit" class="btn" onclick="return onSubmit()" value="Login" />
         <input type="reset" class="btn secondary" onclick="onReset()" value="Reset" />
 
@@ -27,7 +29,4 @@
 
         <asp:Label ID="lblMessage" runat="server" CssClass="server-msg"></asp:Label>
     </div>
-
-    <script src="js/login.js" defer></script>
-
 </asp:Content>

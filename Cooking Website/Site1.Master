@@ -22,21 +22,24 @@
         <nav class="navbar">
             <a href="/Index.aspx" class="logo transparent-link">FreshBite</a>
             <ul class="nav-links">
-
                 <li><a href="/Tips.aspx">Tips & Tricks</a></li>
                 <li><a href="/Gallery.aspx">Gallery</a></li>
+                <li><a href="/Recipes.aspx">Recipes</a></li>
                 <li><a href="/Utilities/UnitsCalculator.aspx">Utilities</a></li>
 
+                <%-- Quiz link is only visible to logged-in users --%>
                 <% if (Session["Id"] != null)
                     {
                 %>
                 <li><a href="/Quiz.aspx">Quiz</a></li>
                 <% } %>
+                <%-- Admin link restricted to the hard-coded admin account (see AdminSidebar.master.cs) --%>
                 <% if ((string)Session["Username"] == "ofri")
                     { %>
                 <li><a href="/Admin/ViewUsers.aspx">Admin</a></li>
                 <% } %>
                 <li>
+                    <%-- Switch between logged-in dropdown (with Sign Out / Delete Account) and guest dropdown (Login / Register) --%>
                     <% if (Session["Id"] != null)
                         {
 
@@ -132,6 +135,7 @@
     </form>
 
     <script>
+        // Hover-open the profile dropdown with a short close-delay to avoid accidental dismissal
         const wrapper = document.querySelector('.profile-wrapper');
         if (wrapper) {
             let closeTimer;
@@ -140,6 +144,7 @@
                 wrapper.classList.add('open');
             });
             wrapper.addEventListener('mouseleave', () => {
+                // 100 ms grace period lets the user move the mouse into the dropdown without it closing
                 closeTimer = setTimeout(() => wrapper.classList.remove('open'), 100);
             });
         }

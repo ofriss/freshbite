@@ -8,6 +8,7 @@ namespace Cooking_Website
     {
         private readonly RecipeRepository _repo = new RecipeRepository();
 
+        // On first load: populates hidden profile fields for JS and binds the recipe/cuisine repeaters
         protected void Page_Load(object sender, EventArgs e)
         {
             bool isLoggedIn = Session["Id"] != null;
@@ -48,6 +49,7 @@ namespace Cooking_Website
             return "<div class='card-image-placeholder'></div>";
         }
 
+        // Binds both the recipe card repeater and the cuisine filter button repeater
         private void BindAll()
         {
             RecipeRepeater.DataSource = _repo.GetRecipes();

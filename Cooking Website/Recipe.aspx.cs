@@ -10,6 +10,7 @@ namespace Cooking_Website
 
         private readonly RecipeRepository _repo = new RecipeRepository();
 
+        // Resolves recipe by ?id=, binds repeaters, and populates hidden profile fields for client-side JS
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!int.TryParse(Request.QueryString["id"], out int id))
