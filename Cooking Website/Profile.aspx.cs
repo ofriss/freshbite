@@ -22,6 +22,12 @@ namespace Cooking_Website
             }
 
             profileInfo = UsersRepository.GetRow((int)Session["Id"]);
+            if (profileInfo.Count == 0)
+            {
+                // GetRow returns empty dict on DB error — nothing to show, send user home
+                Response.Redirect("/Index.aspx");
+                return;
+            }
         }
 
         // Server-side save handler: validates all fields, checks username uniqueness,
@@ -210,8 +216,7 @@ namespace Cooking_Website
         {
             return dict.Where(kvp =>
                     !string.IsNullOrEmpty(kvp.Value?.ToString()) &&
-                    (!profileInfo.ContainsKey(kvp.Key) ||
-                    !ValuesAreEqual(kvp.Value, profileInfo[kvp.Key])))
+                    !ValuesAreEqual(kvp.Value, profileInfo[kvp.Key]))
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
         }
 

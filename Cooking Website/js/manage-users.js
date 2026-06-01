@@ -97,13 +97,12 @@ function checkPass() {
     const val = els.pwd.value || '';
 
     // Edit mode blank password = keep existing = skip validation
+    // checkPassValidation() will be called by onSubmit (bitwise &) and handles the blank case itself
     if (currentMode === 'edit' && val === '') {
         setMsg(els.pwdMsg);
-        checkPassValidation();
         return true;
     }
 
-    checkPassValidation();
     if (!requireCondition(val.length >= 8, els.pwdMsg, 'Password too short.')) return false;
     if (!requireCondition(!/\s/.test(val), els.pwdMsg, 'No spaces allowed.')) return false;
     if (!requireCondition(hasLowerAndUpper(val), els.pwdMsg, 'Must include upper & lower case.')) return false;

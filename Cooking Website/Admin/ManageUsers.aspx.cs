@@ -65,19 +65,22 @@ namespace Cooking_Website.Admin
                 string cuisine = row["Cuisine"].ToString();
                 string skill = row["Skill"].ToString();
 
-                // Safe for JS string literals: escape backslash then single quote
+                // JS-escape all string fields placed inside single-quoted onclick arguments
                 string usernameJs = username.Replace("\\", "\\\\").Replace("'", "\\'");
+                string genderJs   = gender.Replace("\\", "\\\\").Replace("'", "\\'");
+                string cuisineJs  = cuisine.Replace("\\", "\\\\").Replace("'", "\\'");
+                string skillJs    = skill.Replace("\\", "\\\\").Replace("'", "\\'");
 
                 html += "<tr>";
                 html += $"<td>{id}</td>";
                 html += $"<td>{HttpUtility.HtmlEncode(username)}</td>";
                 html += $"<td>{birthday}</td>";
-                html += $"<td>{gender}</td>";
+                html += $"<td>{HttpUtility.HtmlEncode(gender)}</td>";
                 html += $"<td>{HttpUtility.HtmlEncode(cuisine)}</td>";
-                html += $"<td>{skill}</td>";
+                html += $"<td>{HttpUtility.HtmlEncode(skill)}</td>";
                 html += "<td class='action-cell'>";
                 html += $"<button class='action-btn edit-btn' type='button' " +
-                        $"onclick=\"openEdit({id},'{usernameJs}','{birthdayVal}','{gender}','{cuisine}','{skill}')\">Edit</button>";
+                        $"onclick=\"openEdit({id},'{usernameJs}','{birthdayVal}','{genderJs}','{cuisineJs}','{skillJs}')\">Edit</button>";
                 html += $"<button class='action-btn delete-btn' type='button' " +
                         $"onclick=\"confirmDelete({id},'{usernameJs}')\">Delete</button>";
                 html += "</td>";
@@ -100,8 +103,20 @@ namespace Cooking_Website.Admin
             string cuisine = Request.Form["mu-cuisine"] ?? "";
             string skill = Request.Form["mu-skill"] ?? "";
 
-            // Server-side validation (mirror of Register) — stop on first error
-            string validationMessage = ValidateForm(username, password, birthday, gender, cuisine, skill, isCreate: true, userId: 0);
+            // Server-side validation — wrapped in try-catch so a DB error inside
+            // DoesUserExist (username duplicate check) shows a friendly message
+            string validationMessage;
+            try
+            {
+                validationMessage = ValidateForm(username, password, birthday, gender, cuisine, skill, isCreate: true, userId: 0);
+            }
+            catch
+            {
+                ShowMessage("Something went wrong while validating. Please try again.", System.Drawing.Color.Red);
+                BindUsers();
+                return;
+            }
+
             if (validationMessage != null)
             {
                 ShowMessage(validationMessage, System.Drawing.Color.Red);
@@ -118,10 +133,7 @@ namespace Cooking_Website.Admin
                 {
                     cmd.Parameters.AddWithValue("@Username", username);
                     cmd.Parameters.AddWithValue("@Password", password);
-                    // Fall back to DateTime.MinValue when the birthday can't be parsed (matches Register)
-                    if (!DateTime.TryParse(birthday, out DateTime bday))
-                        bday = DateTime.MinValue;
-                    cmd.Parameters.AddWithValue("@Birthday", bday);
+                    cmd.Parameters.AddWithValue("@Birthday", DateTime.Parse(birthday));
                     cmd.Parameters.AddWithValue("@Gender", gender);
                     cmd.Parameters.AddWithValue("@Cuisine", cuisine);
                     cmd.Parameters.AddWithValue("@Skill", skill);
@@ -159,8 +171,20 @@ namespace Cooking_Website.Admin
                 return;
             }
 
-            // Server-side validation (mirror of Register) — stop on first error
-            string validationMessage = ValidateForm(username, password, birthday, gender, cuisine, skill, isCreate: false, userId: userId);
+            // Server-side validation — wrapped in try-catch so a DB error inside
+            // DoesUserExist (username duplicate check) shows a friendly message
+            string validationMessage;
+            try
+            {
+                validationMessage = ValidateForm(username, password, birthday, gender, cuisine, skill, isCreate: false, userId: userId);
+            }
+            catch
+            {
+                ShowMessage("Something went wrong while validating. Please try again.", System.Drawing.Color.Red);
+                BindUsers();
+                return;
+            }
+
             if (validationMessage != null)
             {
                 ShowMessage(validationMessage, System.Drawing.Color.Red);
@@ -183,10 +207,7 @@ namespace Cooking_Website.Admin
                 {
                     cmd.Parameters.AddWithValue("@Id", userId);
                     cmd.Parameters.AddWithValue("@Username", username);
-                    // Fall back to DateTime.MinValue when the birthday can't be parsed (matches Register)
-                    if (!DateTime.TryParse(birthday, out DateTime bday))
-                        bday = DateTime.MinValue;
-                    cmd.Parameters.AddWithValue("@Birthday", bday);
+                    cmd.Parameters.AddWithValue("@Birthday", DateTime.Parse(birthday));
                     cmd.Parameters.AddWithValue("@Gender", gender);
                     cmd.Parameters.AddWithValue("@Cuisine", cuisine);
                     cmd.Parameters.AddWithValue("@Skill", skill);

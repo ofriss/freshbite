@@ -11,24 +11,14 @@ namespace Cooking_Website.DAL
         // Returns true when a user with the given username already exists
         public static bool DoesUserExist(string username)
         {
-            try
+            string connStr = SqlHelper.LoadConnectionString();
+
+            using (var conn = new SqlConnection(connStr))
+            using (var cmd = new SqlCommand("SELECT COUNT(*) FROM dbo.Users WHERE Username = @Username", conn))
             {
-                string connStr = SqlHelper.LoadConnectionString();
-
-                using (var conn = new SqlConnection(connStr))
-                using (var cmd = new SqlCommand("SELECT COUNT(*) FROM dbo.Users WHERE Username = @Username", conn))
-                {
-                    cmd.Parameters.AddWithValue("@Username", username);
-
-                    conn.Open();
-                    int count = (int)cmd.ExecuteScalar();
-
-                    return count > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                cmd.Parameters.AddWithValue("@Username", username);
+                conn.Open();
+                return (int)cmd.ExecuteScalar() > 0;
             }
         }
 
@@ -36,25 +26,15 @@ namespace Cooking_Website.DAL
         // (used when editing a user so its own username isn't flagged as a duplicate).
         public static bool DoesUserExist(string username, int excludeId)
         {
-            try
+            string connStr = SqlHelper.LoadConnectionString();
+
+            using (var conn = new SqlConnection(connStr))
+            using (var cmd = new SqlCommand("SELECT COUNT(*) FROM dbo.Users WHERE Username = @Username AND Id <> @ExcludeId", conn))
             {
-                string connStr = SqlHelper.LoadConnectionString();
-
-                using (var conn = new SqlConnection(connStr))
-                using (var cmd = new SqlCommand("SELECT COUNT(*) FROM dbo.Users WHERE Username = @Username AND Id <> @ExcludeId", conn))
-                {
-                    cmd.Parameters.AddWithValue("@Username", username);
-                    cmd.Parameters.AddWithValue("@ExcludeId", excludeId);
-
-                    conn.Open();
-                    int count = (int)cmd.ExecuteScalar();
-
-                    return count > 0;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                cmd.Parameters.AddWithValue("@Username", username);
+                cmd.Parameters.AddWithValue("@ExcludeId", excludeId);
+                conn.Open();
+                return (int)cmd.ExecuteScalar() > 0;
             }
         }
 
