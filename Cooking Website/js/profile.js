@@ -26,9 +26,10 @@ function clearErrors() {
     document.querySelectorAll('.field-error').forEach(el => el.classList.remove('visible'));
 }
 
-// Password must be 8+ chars, no spaces, mixed case, allowed specials only
+// Password must be 8+ chars, no spaces, mixed case, at least one digit, allowed specials only
 function isValidPassword(pw) {
-    return pw.length >= 8 && !/\s/.test(pw) && /[A-Z]/.test(pw) && /[a-z]/.test(pw) && !/[^a-zA-Z0-9!*@_$#]/.test(pw);
+    return pw.length >= 8 && !/\s/.test(pw) && /[A-Z]/.test(pw) && /[a-z]/.test(pw)
+        && /[0-9]/.test(pw) && !/[^a-zA-Z0-9!*@_$#]/.test(pw);
 }
 
 // Uppercases the first character and lowercases the rest
@@ -94,16 +95,25 @@ function validatePassword() {
     const next = document.getElementById('edit-new-password').value;
     const confirm = document.getElementById('edit-confirm-password').value;
 
+    // Cross-check the new password against the username/birthday year being saved
+    const username = document.getElementById('edit-username').value.trim();
+    const birthday = document.getElementById('edit-birthday').value;
+    const birthdayYear = birthday ? new Date(birthday).getFullYear() : null;
+
     // All blank = not changing password = valid
     if (!current && !next && !confirm) return true;
 
     let ok = true;
-    if (!isValidPassword(current)) { showError('error-current-password', 'At least 8 chars, no spaces, upper and lowercase.'); ok = false; }
+    // Current password only needs to be present — the server verifies it against the stored value.
+    // (Don't enforce the new complexity rules here, or users with older passwords get locked out.)
+    if (!current) { showError('error-current-password', 'Please enter your current password.'); ok = false; }
     else clearError('error-current-password');
 
     if (!next) { showError('error-new-password', 'Please enter a new password.'); ok = false; }
-    else if (!isValidPassword(next)) { showError('error-new-password', 'At least 8 chars, no spaces, upper and lowercase.'); ok = false; }
+    else if (!isValidPassword(next)) { showError('error-new-password', 'At least 8 chars, no spaces, upper and lowercase, and a digit.'); ok = false; }
     else if (next === current) { showError('error-new-password', 'New password must differ from current.'); ok = false; }
+    else if (birthdayYear && next.includes(birthdayYear)) { showError('error-new-password', "Password can't have your birthday year in it."); ok = false; }
+    else if (username && next.includes(username)) { showError('error-new-password', "Password can't have your username in it."); ok = false; }
     else clearError('error-new-password');
 
     if (!confirm) { showError('error-confirm-password', 'Please confirm your new password.'); ok = false; }

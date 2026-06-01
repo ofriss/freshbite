@@ -312,9 +312,18 @@ namespace Cooking_Website.Admin
                 if (!password.Any(char.IsLower) || !password.Any(char.IsUpper))
                     return "Password must have upper and lower letters.";
 
+                if (!password.Any(char.IsDigit))
+                    return "Password must have at least one digit.";
+
                 // Password doesn't contain special characters except !*@_$#
                 if (Regex.IsMatch(password, @"[^a-zA-Z0-9!*@_$#]"))
                     return "Password can't have special characters (other than !*@_$#).";
+
+                if (DateTime.TryParse(birthday, out DateTime bdayParsed) && password.Contains(bdayParsed.Year.ToString()))
+                    return "Password can't have the birthday year in it.";
+
+                if (password.Contains(username))
+                    return "Password can't have the username in it.";
             }
 
             // Birthday

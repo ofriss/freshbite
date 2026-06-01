@@ -1,4 +1,4 @@
-﻿// recipes.js — client-side filtering, "For You" badges, and filter state persistence
+// recipes.js — client-side filtering, "For You" badges, and filter state persistence
 // for the Recipes listing page. User profile data is injected via hidden fields.
 
 /* ── 1. REFERENCES ───────────────────────────────────────────── */
@@ -88,6 +88,7 @@ function applyFilters() {
     });
 
     emptyState.hidden = visibleCount > 0;
+    saveFilterState();
 }
 
 
@@ -145,20 +146,7 @@ cuisineBtns.forEach(function (btn) {
 });
 
 
-/* ── 8. INITIALISE ───────────────────────────────────────────── */
-
-document.addEventListener("DOMContentLoaded", function () {
-
-    // Set All as active on every filter group by default
-    document.querySelectorAll("[data-filter='All']")
-        .forEach(function (btn) { btn.classList.add("active"); });
-
-    // Stamp For You badges once — profile never changes during the session
-    applyForYouBadges();
-});
-
-
-/* ── 9. GUEST BANNER DISMISS ─────────────────────────────────── */
+/* ── 8. GUEST BANNER DISMISS ─────────────────────────────────── */
 
 if (guestClose && guestBanner) {
     guestClose.addEventListener("click", function () {
@@ -166,7 +154,8 @@ if (guestClose && guestBanner) {
     });
 }
 
-/* ── 10. FILTER STATE PERSISTENCE ───────────────────────────── */
+
+/* ── 9. FILTER STATE PERSISTENCE ────────────────────────────── */
 
 // Serialises current filter state to sessionStorage so Recipe.aspx can restore it on back-navigate
 function saveFilterState() {
@@ -179,45 +168,32 @@ function saveFilterState() {
     sessionStorage.setItem("recipes_filters", params.toString());
 }
 
-// Hook into existing filter handlers by wrapping applyFilters
-var _originalApplyFilters = applyFilters;
-applyFilters = function () {
-    _originalApplyFilters();
-    saveFilterState();
-};
+// Sets the active button for one filter dimension — handles the default "All" case too
+function restoreSingleSelect(type, value) {
+    document.querySelectorAll("[data-filter-type='" + type + "']").forEach(function (b) {
+        b.classList.toggle("active", b.getAttribute("data-filter") === value);
+    });
+}
 
-// Restore filter state if arriving from a recipe page
+
+/* ── 10. INITIALISE ──────────────────────────────────────────── */
+
 document.addEventListener("DOMContentLoaded", function () {
+    // Restore filter state from URL if arriving back from a recipe page
     var params = new URLSearchParams(window.location.search);
-
     var difficulty = params.get("difficulty");
-    var category = params.get("category");
-    var cuisines = params.get("cuisines");
+    var category   = params.get("category");
+    var cuisines   = params.get("cuisines");
 
-    if (difficulty) {
-        activeDifficulty = difficulty;
-        document.querySelectorAll("[data-filter-type='difficulty']")
-            .forEach(function (b) {
-                b.classList.toggle("active", b.getAttribute("data-filter") === difficulty);
-            });
-    }
+    if (difficulty) activeDifficulty = difficulty;
+    if (category)   activeCategory   = category;
+    if (cuisines)   activeCuisines   = new Set(cuisines.split(","));
 
-    if (category) {
-        activeCategory = category;
-        document.querySelectorAll("[data-filter-type='category']")
-            .forEach(function (b) {
-                b.classList.toggle("active", b.getAttribute("data-filter") === category);
-            });
-    }
+    // Sync all button active states (defaults to "All" when nothing was restored)
+    restoreSingleSelect("difficulty", activeDifficulty);
+    restoreSingleSelect("category",   activeCategory);
+    syncCuisineButtons();
 
-    if (cuisines) {
-        activeCuisines = new Set(cuisines.split(","));
-        syncCuisineButtons();
-    }
-
-    // Re-run filters and badges with restored state
-    if (difficulty || category || cuisines) {
-        applyFilters();
-        applyForYouBadges();
-    }
+    if (difficulty || category || cuisines) applyFilters();
+    applyForYouBadges();
 });

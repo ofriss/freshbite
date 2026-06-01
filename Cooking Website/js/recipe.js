@@ -10,9 +10,6 @@ const scalerValue = document.getElementById("scaler-value");
 const ingredientList = document.getElementById("ingredients-list");
 const clearBtn = document.getElementById("clear-checks-btn");
 
-const hiddenDifficulty = document.getElementById(RecipeConfig.hiddenDifficultyId);
-const hiddenCuisines = document.getElementById(RecipeConfig.hiddenCuisinesId);
-
 // Recipe ID from the URL — used as the sessionStorage key for checked ingredients
 const recipeId = new URLSearchParams(window.location.search).get("id");
 
@@ -135,19 +132,17 @@ function scaleIngredients() {
 
 if (scalerMinus) {
     scalerMinus.addEventListener("click", function () {
-        if (currentServings > minServings) {
-            currentServings--;
-            scaleIngredients();
-        }
+        if (currentServings <= minServings) return;
+        currentServings--;
+        scaleIngredients();
     });
 }
 
 if (scalerPlus) {
     scalerPlus.addEventListener("click", function () {
-        if (currentServings < maxServings) {
-            currentServings++;
-            scaleIngredients();
-        }
+        if (currentServings >= maxServings) return;
+        currentServings++;
+        scaleIngredients();
     });
 }
 
@@ -159,11 +154,11 @@ function loadCheckedState() {
     var saved = sessionStorage.getItem(STORAGE_KEY_CHECKS);
     if (!saved) return;
 
-    var checkedIndexes = JSON.parse(saved);
+    var checkedIndexes = new Set(JSON.parse(saved));
     var items = ingredientList.querySelectorAll(".ingredient-item");
 
     items.forEach(function (item, index) {
-        if (checkedIndexes.indexOf(index) !== -1) {
+        if (checkedIndexes.has(index)) {
             item.classList.add("checked");
         }
     });

@@ -47,6 +47,8 @@ document.addEventListener('keydown', e => {
     if (e.key === 'ArrowRight') go(current + 1);
 });
 
+setInterval(() => go(current + 1), 5000);
+
 // Initialize
 caption.textContent = captions[0];
 counter.textContent = '01 / ' + String(images.length).padStart(2, '0')

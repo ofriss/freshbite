@@ -1,5 +1,6 @@
-﻿using Cooking_Website.DAL;
+using Cooking_Website.DAL;
 using System;
+using System.Text;
 using System.Web.UI;
 
 namespace Cooking_Website
@@ -10,7 +11,7 @@ namespace Cooking_Website
 
         private readonly RecipeRepository _repo = new RecipeRepository();
 
-        // Resolves recipe by ?id=, binds repeaters, and populates hidden profile fields for client-side JS
+        // Resolves recipe by ?id=, binds hero image, and computes For You badge visibility
         protected void Page_Load(object sender, EventArgs e)
         {
             if (!int.TryParse(Request.QueryString["id"], out int id))
@@ -27,64 +28,41 @@ namespace Cooking_Website
                 return;
             }
 
-            if (!IsPostBack)
+            // Hero image
+            if (!string.IsNullOrEmpty(CurrentRecipe.ImageUrl))
             {
-                // Hero image
-                if (!string.IsNullOrEmpty(CurrentRecipe.ImageUrl))
-                {
-                    HeroImagePanel.Visible = true;
-                    HeroImage.ImageUrl = CurrentRecipe.ImageUrl;
-                    HeroImage.AlternateText = CurrentRecipe.Title;
-                }
-                else
-                {
-                    HeroImagePanel.Visible = false;
-                }
+                HeroImagePanel.Visible = true;
+                HeroImage.ImageUrl = CurrentRecipe.ImageUrl;
+                HeroImage.AlternateText = CurrentRecipe.Title;
+            }
+            else
+            {
+                HeroImagePanel.Visible = false;
+            }
 
-                // Bind repeaters
-                IngredientsRepeater.DataSource = CurrentRecipe.Ingredients;
-                IngredientsRepeater.DataBind();
+            // Tips section visibility
+            TipsPanel.Visible = CurrentRecipe.Tips != null && CurrentRecipe.Tips.Count > 0;
 
-                StepsRepeater.DataSource = CurrentRecipe.Steps;
-                StepsRepeater.DataBind();
+            // Resolve user profile for For You badge
+            bool isLoggedIn = Session["Id"] != null;
+            if (isLoggedIn)
+            {
+                int userId = (int)Session["Id"];
 
-                // Only show tips section if recipe has tips
-                TipsPanel.Visible = CurrentRecipe.Tips != null && CurrentRecipe.Tips.Count > 0;
-                if (TipsPanel.Visible)
-                {
-                    TipsRepeater.DataSource = CurrentRecipe.Tips;
-                    TipsRepeater.DataBind();
-                }
+                string skill = _repo.GetUserSkillLevel(userId);
+                var cuisines = _repo.GetUserFavouriteCuisines(userId);
 
-                // Resolve user profile for For You badge
-                bool isLoggedIn = Session["Id"] != null;
-                if (isLoggedIn)
-                {
-                    int userId = (int)Session["Id"];
+                bool matchesDifficulty = string.IsNullOrEmpty(skill)
+                    || GetDifficultyRank(CurrentRecipe.Difficulty) <= GetDifficultyRank(skill);
 
-                    string skill = _repo.GetUserSkillLevel(userId);
-                    HiddenDifficulty.Value = skill ?? "";
+                bool matchesCuisine = cuisines.Count == 0
+                    || cuisines.Contains(CurrentRecipe.Cuisine);
 
-                    var cuisines = _repo.GetUserFavouriteCuisines(userId);
-                    HiddenCuisines.Value = cuisines.Count > 0
-                        ? string.Join(",", cuisines)
-                        : "";
-
-                    bool matchesDifficulty = string.IsNullOrEmpty(skill)
-                        || GetDifficultyRank(CurrentRecipe.Difficulty) <= GetDifficultyRank(skill);
-
-                    bool matchesCuisine = cuisines.Count == 0
-                        || cuisines.Contains(CurrentRecipe.Cuisine);
-
-                    ForYouPanel.Visible = matchesDifficulty && matchesCuisine;
-                }
-                else
-                {
-                    ForYouPanel.Visible = false;
-                }
-
-                // DataBind the page for <%# %> expressions in the header
-                Page.DataBind();
+                ForYouPanel.Visible = matchesDifficulty && matchesCuisine;
+            }
+            else
+            {
+                ForYouPanel.Visible = false;
             }
         }
 
@@ -93,6 +71,47 @@ namespace Cooking_Website
         {
             string val = unit?.ToString();
             return !string.IsNullOrEmpty(val) ? val + " " : "";
+        }
+
+        protected string BuildIngredientsHtml()
+        {
+            var sb = new StringBuilder();
+            foreach (var ing in CurrentRecipe.Ingredients)
+            {
+                var qty = Enc(ing.Quantity?.ToString() ?? "");
+                var unit = Enc(RenderUnit(ing.Unit));
+                sb.Append("<li class=\"ingredient-item\">")
+                  .Append("<span class=\"ingredient-check\" aria-hidden=\"true\">&#10003;</span>")
+                  .Append("<span class=\"ingredient-text\">")
+                  .Append("<span class=\"ingredient-quantity\" data-original='").Append(qty).Append("'>").Append(qty).Append("</span>")
+                  .Append(unit)
+                  .Append("<span class=\"ingredient-name\">").Append(Enc(ing.Name)).Append("</span>")
+                  .Append("</span>")
+                  .Append("</li>");
+            }
+            return sb.ToString();
+        }
+
+        protected string BuildStepsHtml()
+        {
+            var sb = new StringBuilder();
+            foreach (var step in CurrentRecipe.Steps)
+                sb.Append("<li><div class=\"step-body\">").Append(Enc(step)).Append("</div></li>");
+            return sb.ToString();
+        }
+
+        protected string BuildTipsHtml()
+        {
+            var sb = new StringBuilder();
+            foreach (var tip in CurrentRecipe.Tips)
+                sb.Append("<li><div class=\"tip-body\">").Append(Enc(tip)).Append("</div></li>");
+            return sb.ToString();
+        }
+
+        // HTML-encodes a value for safe inline rendering (mirrors RenderCardImage's alt handling)
+        private static string Enc(object value)
+        {
+            return System.Web.HttpUtility.HtmlEncode(value?.ToString() ?? "");
         }
 
         // Maps difficulty to a numeric rank for comparison

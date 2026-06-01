@@ -1,4 +1,4 @@
-﻿<%@ Page Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="Recipes.aspx.cs" Inherits="Cooking_Website.Recipes" %>
+<%@ Page Language="C#" MasterPageFile="~/Site1.Master" AutoEventWireup="true" CodeBehind="Recipes.aspx.cs" Inherits="Cooking_Website.Recipes" %>
 
 <asp:Content ID="Content1" ContentPlaceHolderID="head" runat="server">
     <link rel="stylesheet" href="/css/recipes.css" />
@@ -68,14 +68,7 @@
                 <span class="filter-label">Cuisine</span>
                 <div class="filter-btns">
                     <button class="filter-btn" data-filter-type="cuisine" data-filter="All" type="button">All</button>
-                    <asp:Repeater ID="CuisineRepeater" runat="server">
-                        <ItemTemplate>
-                            <button class="filter-btn" data-filter-type="cuisine"
-                                data-filter='<%# Container.DataItem %>'
-                                type="button">
-                                <%# Container.DataItem %></button>
-                        </ItemTemplate>
-                    </asp:Repeater>
+                    <%= BuildCuisineButtonsHtml() %>
                 </div>
             </div>
 
@@ -87,37 +80,7 @@
 
         <!-- ── Recipe Grid ── -->
         <div class="recipe-grid" id="recipe-grid">
-            <asp:Repeater ID="RecipeRepeater" runat="server">
-                <ItemTemplate>
-                    <a class="recipe-card"
-                        href='/Recipe.aspx?id=<%# Eval("Id") %>'
-                        data-difficulty='<%# Eval("Difficulty") %>'
-                        data-category='<%# Eval("Category") %>'
-                        data-cuisine='<%# Eval("Cuisine") %>'>
-
-                        <div class="card-image">
-                            <%# RenderCardImage(Eval("ImageUrl"), Eval("Title")) %>
-                        </div>
-
-                        <div class="card-body">
-                            <div class="card-meta">
-                                <span class="card-category"><%# Eval("Category") %></span>
-                                <span class="card-difficulty <%# Eval("Difficulty").ToString().ToLower() %>">
-                                    <%# Eval("Difficulty") %>
-                                </span>
-                            </div>
-                            <h2 class="card-title"><%# Eval("Title") %></h2>
-                            <p class="card-description"><%# Eval("Description") %></p>
-                            <div class="card-footer">
-                                <%-- Total time = prep + cook combined --%>
-                    <span class="card-time">&#9201; <%# (int)Eval("PrepTime") + (int)Eval("CookTime") %> min</span>
-                                <span class="card-servings">&#9787; <%# Eval("Servings") %> servings</span>
-                            </div>
-                        </div>
-
-                    </a>
-                </ItemTemplate>
-            </asp:Repeater>
+            <%= BuildRecipeCardsHtml() %>
         </div>
 
         <div class="recipes-empty" id="recipes-empty" hidden>

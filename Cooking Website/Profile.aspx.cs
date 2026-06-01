@@ -176,9 +176,33 @@ namespace Cooking_Website
                     return;
                 }
 
+                if (!newPassword.Any(char.IsDigit))
+                {
+                    serverMsg.Text = "New password must have at least one digit.";
+                    serverMsg.Style["display"] = "block";
+                    serverMsg.CssClass = "server-message server-message-error";
+                    return;
+                }
+
                 if (Regex.IsMatch(newPassword, @"[^a-zA-Z0-9!*@_$#]"))
                 {
                     serverMsg.Text = "Password can't have special characters (other than !*@_$#).";
+                    serverMsg.Style["display"] = "block";
+                    serverMsg.CssClass = "server-message server-message-error";
+                    return;
+                }
+
+                if (newPassword.Contains(birthday.Year.ToString()))
+                {
+                    serverMsg.Text = "New password can't have your birthday year in it.";
+                    serverMsg.Style["display"] = "block";
+                    serverMsg.CssClass = "server-message server-message-error";
+                    return;
+                }
+
+                if (newPassword.Contains(username))
+                {
+                    serverMsg.Text = "New password can't have your username in it.";
                     serverMsg.Style["display"] = "block";
                     serverMsg.CssClass = "server-message server-message-error";
                     return;

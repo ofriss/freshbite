@@ -42,7 +42,7 @@ function hasLowerAndUpper(s) {
 
 // Validates username: min 4 chars, no spaces, alphanumeric only
 function checkName() {
-    const val = els.username.value || '';
+    const val = (els.username.value || '').trim();
 
     if (!requireCondition(val.length >= 4, els.usernameMsg, 'Username too short.')) return false;
     if (!requireCondition(!/\s/.test(val), els.usernameMsg, 'No spaces allowed.')) return false;
@@ -65,6 +65,7 @@ function checkPass() {
     if (!requireCondition(val.length >= 8, els.pwdMsg, 'Password too short.')) return false;
     if (!requireCondition(!/\s/.test(val), els.pwdMsg, 'No spaces allowed.')) return false;
     if (!requireCondition(hasLowerAndUpper(val), els.pwdMsg, 'Must include upper & lower case.')) return false;
+    if (!requireCondition(/[0-9]/.test(val), els.pwdMsg, 'Must include at least one digit.')) return false;
     if (!requireCondition(!/[^a-zA-Z0-9!*@_$#]/.test(val), els.pwdMsg, "Password can't have special characters (other than !*@_$#).")) return false;
 
     if (els.bday.value) {
@@ -73,7 +74,7 @@ function checkPass() {
     }
 
     if (els.username.value) {
-        if (!requireCondition(!val.includes(els.username.value), els.usernameMsg, "Password can't have your username in it.")) return false;
+        if (!requireCondition(!val.includes(els.username.value), els.pwdMsg, "Password can't have your username in it.")) return false;
     }
     
     return true;
