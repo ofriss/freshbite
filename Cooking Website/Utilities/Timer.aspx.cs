@@ -9,6 +9,7 @@ namespace Cooking_Website
 {
     public partial class Timer : System.Web.UI.Page
     {
+        // Static tool page; the countdown timer runs entirely in timer.js
         protected void Page_Load(object sender, EventArgs e)
         {
 

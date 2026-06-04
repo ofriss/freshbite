@@ -9,6 +9,7 @@ namespace Cooking_Website
 {
     public partial class UnitsCalculator : System.Web.UI.Page
     {
+        // Static tool page; all unit conversion happens client-side in units-calculator.js
         protected void Page_Load(object sender, EventArgs e)
         {
 

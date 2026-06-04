@@ -9,6 +9,7 @@ namespace Cooking_Website
 {
     public partial class Substitutions : System.Web.UI.Page
     {
+        // Static reference page; substitution table is hard-coded and filtered client-side by substitutions.js
         protected void Page_Load(object sender, EventArgs e)
         {
 

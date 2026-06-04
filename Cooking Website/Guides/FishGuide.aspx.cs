@@ -9,6 +9,7 @@ namespace Cooking_Website
 {
     public partial class FishGuide : System.Web.UI.Page
     {
+        // Static guide page; all content lives in the markup
         protected void Page_Load(object sender, EventArgs e)
         {
 

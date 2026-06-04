@@ -36,9 +36,9 @@ namespace Cooking_Website
         // Decrement online count; only decrement LoggedIn if the session had an authenticated user
         protected void Session_End(object sender, EventArgs e)
         {
-            Application["Online"] = (int)Application["Online"] - 1;
+            Application["Online"] = Math.Max(0, (int)Application["Online"] - 1);
             if (Session["Id"] != null)
-                Application["LoggedIn"] = (int)Application["LoggedIn"] - 1;
+                Application["LoggedIn"] = Math.Max(0, (int)Application["LoggedIn"] - 1);
         }
 
         protected void Application_End(object sender, EventArgs e)

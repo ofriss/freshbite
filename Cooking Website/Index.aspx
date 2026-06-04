@@ -26,7 +26,11 @@
             <span class="feature-icon">&#9997;</span>
             <h3>Cooking Guides</h3>
             <p>In-depth guides for every ingredient — from meat and fish to bread and sauces. Learn the techniques, not just the recipe.</p>
+            <% if (Session["Id"] != null) { %>
             <a href="/Guides/MeatGuide.aspx" class="feature-link">Browse guides &#8594;</a>
+            <% } else { %>
+            <p class="feature-login-notice"><strong>&#128274; <a href="/Login.aspx">Log in</a> to access the guides.</strong></p>
+            <% } %>
         </div>
         <div class="feature-card">
             <span class="feature-icon">&#127859;</span>

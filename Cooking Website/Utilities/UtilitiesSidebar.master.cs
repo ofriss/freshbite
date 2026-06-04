@@ -9,6 +9,7 @@ namespace Cooking_Website.Utilities
 {
     public partial class UtilitiesSidebar : System.Web.UI.MasterPage
     {
+        // Layout-only master; no server-side logic on load
         protected void Page_Load(object sender, EventArgs e)
         {
 

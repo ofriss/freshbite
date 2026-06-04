@@ -1,4 +1,6 @@
-﻿/* ── 1. ELEMENT REFERENCES ───────────────────────────────────── */
+﻿// timer.js — countdown kitchen timer with click-to-edit time segments, progress bar, and an end beep
+
+/* ── 1. ELEMENT REFERENCES ───────────────────────────────────── */
 
 const timerDisplay = document.getElementById("timer-display");
 const segHours = document.getElementById("seg-hours");

@@ -1,4 +1,6 @@
-﻿/* ── 1. CONVERSION DATA ─────────────────────────────────────── */
+﻿// units-calculator.js — converts a single volume or mass amount into every other unit, shown as result cards
+
+/* ── 1. CONVERSION DATA ─────────────────────────────────────── */
 
 
 const VOLUME_UNITS = [
