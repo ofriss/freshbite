@@ -137,30 +137,17 @@ function setupTabs() {
 
 /* ── 7. ATTACHING EVENTS TO INPUTS ───────────────────────────── */
 
-function setupVolumeEvents() {
-    const amountInput = document.getElementById("vol-amount");
-    const unitSelect = document.getElementById("vol-unit");
-
+// Wire one calculator panel (volume or mass) and render its initial state
+function setupCalculator(amountId, unitId, unitList, resultsId) {
     function update() {
-        runConversion("vol-amount", "vol-unit", VOLUME_UNITS, "vol-results");
+        runConversion(amountId, unitId, unitList, resultsId);
     }
 
-    amountInput.addEventListener("input", update);
-    amountInput.addEventListener("change", update);
-    unitSelect.addEventListener("change", update);
-}
+    document.getElementById(amountId).addEventListener("input", update);
+    document.getElementById(unitId).addEventListener("change", update);
 
-function setupMassEvents() {
-    const amountInput = document.getElementById("mass-amount");
-    const unitSelect = document.getElementById("mass-unit");
-
-    function update() {
-        runConversion("mass-amount", "mass-unit", MASS_UNITS, "mass-results");
-    }
-
-    amountInput.addEventListener("input", update);
-    amountInput.addEventListener("change", update);
-    unitSelect.addEventListener("change", update);
+    // Run once now: with an empty amount this shows the placeholder
+    update();
 }
 
 
@@ -168,10 +155,6 @@ function setupMassEvents() {
 
 document.addEventListener("DOMContentLoaded", function () {
     setupTabs();
-    setupVolumeEvents();
-    setupMassEvents();
-
-    // Show placeholder text in both grids on first load
-    renderResults(null, null, VOLUME_UNITS, document.getElementById("vol-results"));
-    renderResults(null, null, MASS_UNITS, document.getElementById("mass-results"));
+    setupCalculator("vol-amount", "vol-unit", VOLUME_UNITS, "vol-results");
+    setupCalculator("mass-amount", "mass-unit", MASS_UNITS, "mass-results");
 });

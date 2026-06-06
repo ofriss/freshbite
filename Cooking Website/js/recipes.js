@@ -1,199 +1,145 @@
-// recipes.js — client-side filtering, "For You" badges, and filter state persistence
-// for the Recipes listing page. User profile data is injected via hidden fields.
+// recipes.js — filter the recipe grid, badge "For You" matches, and remember
+// filters when navigating to a recipe and back. Profile data comes from hidden
+// fields whose IDs are passed in via RecipesConfig.
 
-/* ── 1. REFERENCES ───────────────────────────────────────────── */
+/* ── Elements ─────────────────────────────────────────────────── */
 
 const cards = document.querySelectorAll(".recipe-card");
 const emptyState = document.getElementById("recipes-empty");
-const guestBanner = document.querySelector(".guest-banner");
-const guestClose = document.getElementById("guest-banner-close");
-
-const hiddenDifficulty = document.getElementById(RecipesConfig.hiddenDifficultyId);
-const hiddenCuisines = document.getElementById(RecipesConfig.hiddenCuisinesId);
+const filterButtons = document.querySelectorAll(".filter-btn");
 
 
-/* ── 2. USER PROFILE ─────────────────────────────────────────── */
+/* ── Logged-in user's profile ─────────────────────────────────── */
 
-// Read once — never changes during the session
-const userDifficulty = hiddenDifficulty && hiddenDifficulty.value
-    ? hiddenDifficulty.value
-    : null;
-
-const userCuisines = hiddenCuisines && hiddenCuisines.value
-    ? new Set(hiddenCuisines.value.split(",").map(function (s) { return s.trim(); }))
-    : new Set();
-
-const isLoggedIn = userDifficulty !== null || userCuisines.size > 0;
-
-
-/* ── 3. FILTER STATE ─────────────────────────────────────────── */
-
-let activeDifficulty = "All";
-let activeCategory = "All";
-let activeCuisines = new Set();   // empty = All
-
-
-/* ── 4. FOR YOU BADGES ───────────────────────────────────────── */
-
-const difficultyRank = { "Easy": 1, "Medium": 2, "Hard": 3 };
-
-// Stamps "For You" badges on cards matching the logged-in user's skill and cuisine preferences
-function applyForYouBadges() {
-    if (!isLoggedIn) return;
-
-    const userRank = difficultyRank[userDifficulty] || 0;
-
-    cards.forEach(function (card) {
-        const cardDifficulty = card.getAttribute("data-difficulty");
-        const cardRank = difficultyRank[cardDifficulty] || 0;
-
-        const matchesDifficulty = !userDifficulty
-            || cardRank <= userRank;
-
-        const matchesCuisine = userCuisines.size === 0
-            || userCuisines.has(card.getAttribute("data-cuisine"));
-
-        if (matchesDifficulty && matchesCuisine) {
-            const meta = card.querySelector(".card-meta");
-            if (meta && !meta.querySelector(".for-you-badge")) {
-                const badge = document.createElement("span");
-                badge.className = "for-you-badge";
-                badge.textContent = "For You";
-                meta.insertBefore(badge, meta.firstChild);
-            }
-        }
-    });
+function fieldValue(id) {
+    // Look up the hidden field by its server-generated id
+    const el = document.getElementById(id);
+    // Return its value, or "" if the field isn't on the page (guest)
+    return el ? el.value : "";
 }
 
+const userDifficulty = fieldValue(RecipesConfig.hiddenDifficultyId);
+const userCuisines = fieldValue(RecipesConfig.hiddenCuisinesId).split(",").filter(Boolean);
+const isLoggedIn = userDifficulty !== "" || userCuisines.length > 0;
 
-/* ── 5. CORE FILTER FUNCTION ─────────────────────────────────── */
+const rank = { Easy: 1, Medium: 2, Hard: 3 };
 
-// Shows/hides recipe cards based on all three active filter dimensions
+
+/* ── Filter state ─────────────────────────────────────────────── */
+
+// "All" means that filter is off. One value per group — clicking replaces it.
+const filters = { difficulty: "All", category: "All", cuisine: "All" };
+
+// A card passes one filter if that filter is "All" or its data value matches.
+function matches(type, card) {
+    // "All" means the filter is off, so every card passes.
+    // Otherwise the card's data-<type> value must equal the chosen value.
+    return filters[type] === "All" || card.dataset[type] === filters[type];
+}
+
+// Show only cards that pass every filter.
 function applyFilters() {
-    let visibleCount = 0;
+    let visible = 0;   // how many cards survived the filters
 
     cards.forEach(function (card) {
-        const passDifficulty = activeDifficulty === "All"
-            || card.getAttribute("data-difficulty") === activeDifficulty;
+        // A card shows only if it passes all three filters at once
+        const show = matches("difficulty", card)
+            && matches("category", card)
+            && matches("cuisine", card);
 
-        const passCategory = activeCategory === "All"
-            || card.getAttribute("data-category") === activeCategory;
-
-        const passCuisine = activeCuisines.size === 0
-            || activeCuisines.has(card.getAttribute("data-cuisine"));
-
-        const visible = passDifficulty && passCategory && passCuisine;
-        card.classList.toggle("hidden", !visible);
-        if (visible) visibleCount++;
+        // Add/remove the .hidden class to show or hide the card
+        card.classList.toggle("hidden", !show);
+        if (show) visible++;
     });
 
-    emptyState.hidden = visibleCount > 0;
-    saveFilterState();
+    // Show the "no results" message only when nothing is visible
+    emptyState.hidden = visible > 0;
+    // Remember the choices so the recipe page can restore them
+    saveFilters();
 }
 
-
-/* ── 6. SINGLE-SELECT HANDLER (Difficulty + Category) ───────── */
-
-// Wires up mutually-exclusive filter buttons (difficulty and category)
-function bindSingleSelect(filterType, onSelect) {
-    const btns = document.querySelectorAll("[data-filter-type='" + filterType + "']");
-
-    btns.forEach(function (btn) {
-        btn.addEventListener("click", function () {
-            btns.forEach(function (b) { b.classList.remove("active"); });
-            btn.classList.add("active");
-            onSelect(btn.getAttribute("data-filter"));
-            applyFilters();
-        });
+// Highlight the chosen button in each group.
+function highlightActive() {
+    filterButtons.forEach(function (btn) {
+        // This button is "active" when its value is the chosen one for its group
+        const selected = filters[btn.dataset.filterType] === btn.dataset.filter;
+        btn.classList.toggle("active", selected);
     });
 }
 
-bindSingleSelect("difficulty", function (val) { activeDifficulty = val; });
-bindSingleSelect("category", function (val) { activeCategory = val; });
-
-
-/* ── 7. MULTI-SELECT HANDLER (Cuisine) ───────────────────────── */
-
-const cuisineBtns = document.querySelectorAll("[data-filter-type='cuisine']");
-
-// Keeps cuisine button active states in sync with the activeCuisines Set
-function syncCuisineButtons() {
-    cuisineBtns.forEach(function (btn) {
-        const val = btn.getAttribute("data-filter");
-        btn.classList.toggle("active",
-            val === "All" ? activeCuisines.size === 0 : activeCuisines.has(val)
-        );
-    });
-}
-
-cuisineBtns.forEach(function (btn) {
+filterButtons.forEach(function (btn) {
     btn.addEventListener("click", function () {
-        const val = btn.getAttribute("data-filter");
-
-        if (val === "All") {
-            activeCuisines.clear();
-        } else {
-            if (activeCuisines.has(val)) {
-                activeCuisines.delete(val);
-            } else {
-                activeCuisines.add(val);
-            }
-        }
-
-        syncCuisineButtons();
+        // Record this button's value as the choice for its group (difficulty/category/cuisine)
+        filters[btn.dataset.filterType] = btn.dataset.filter;
+        // Update the button highlighting, then re-filter the grid
+        highlightActive();
         applyFilters();
     });
 });
 
 
-/* ── 8. GUEST BANNER DISMISS ─────────────────────────────────── */
+/* ── "For You" badges ─────────────────────────────────────────── */
 
-if (guestClose && guestBanner) {
-    guestClose.addEventListener("click", function () {
-        guestBanner.style.display = "none";
+// Badge cards that suit the user's skill level and favourite cuisines.
+function addForYouBadges() {
+    // Guests have no profile, so there's nothing to recommend
+    if (!isLoggedIn) return;
+
+    cards.forEach(function (card) {
+        // Suitable if the recipe is at or below the user's skill level
+        const okDifficulty = !userDifficulty
+            || (rank[card.dataset.difficulty] || 0) <= (rank[userDifficulty] || 0);
+        // Suitable if the user has no cuisine preference, or this cuisine is one they like
+        const okCuisine = userCuisines.length === 0
+            || userCuisines.includes(card.dataset.cuisine);
+
+        if (okDifficulty && okCuisine) {
+            // Build the badge and drop it in at the start of the card's meta row
+            const badge = document.createElement("span");
+            badge.className = "for-you-badge";
+            badge.textContent = "For You";
+            card.querySelector(".card-meta").prepend(badge);
+        }
     });
 }
 
 
-/* ── 9. FILTER STATE PERSISTENCE ────────────────────────────── */
+/* ── Guest banner dismiss ─────────────────────────────────────── */
 
-// Serialises current filter state to sessionStorage so Recipe.aspx can restore it on back-navigate
-function saveFilterState() {
-    var params = new URLSearchParams();
+const banner = document.querySelector(".guest-banner");
+const bannerClose = document.getElementById("guest-banner-close");
+if (banner && bannerClose) {
+    bannerClose.addEventListener("click", function () {
+        banner.style.display = "none";
+    });
+}
 
-    if (activeDifficulty !== "All") params.set("difficulty", activeDifficulty);
-    if (activeCategory !== "All") params.set("category", activeCategory);
-    if (activeCuisines.size > 0) params.set("cuisines", Array.from(activeCuisines).join(","));
 
+/* ── Filter persistence (so Recipe.aspx's Back button can restore) ── */
+
+function saveFilters() {
+    // Build a query string holding only the filters that are switched on
+    const params = new URLSearchParams();
+    Object.keys(filters).forEach(function (type) {
+        // Skip "All" — it's the default and doesn't need saving
+        if (filters[type] !== "All") params.set(type, filters[type]);
+    });
+    // Stash it so Recipe.aspx's Back button can return here with the same filters
     sessionStorage.setItem("recipes_filters", params.toString());
 }
 
-// Sets the active button for one filter dimension — handles the default "All" case too
-function restoreSingleSelect(type, value) {
-    document.querySelectorAll("[data-filter-type='" + type + "']").forEach(function (b) {
-        b.classList.toggle("active", b.getAttribute("data-filter") === value);
-    });
-}
 
-
-/* ── 10. INITIALISE ──────────────────────────────────────────── */
+/* ── Initialise ───────────────────────────────────────────────── */
 
 document.addEventListener("DOMContentLoaded", function () {
-    // Restore filter state from URL if arriving back from a recipe page
-    var params = new URLSearchParams(window.location.search);
-    var difficulty = params.get("difficulty");
-    var category   = params.get("category");
-    var cuisines   = params.get("cuisines");
+    // Read any filters passed in the URL (set by the recipe page's Back button)
+    const params = new URLSearchParams(window.location.search);
+    Object.keys(filters).forEach(function (type) {
+        // Apply each one we find; missing ones keep their "All" default
+        if (params.get(type)) filters[type] = params.get(type);
+    });
 
-    if (difficulty) activeDifficulty = difficulty;
-    if (category)   activeCategory   = category;
-    if (cuisines)   activeCuisines   = new Set(cuisines.split(","));
-
-    // Sync all button active states (defaults to "All" when nothing was restored)
-    restoreSingleSelect("difficulty", activeDifficulty);
-    restoreSingleSelect("category",   activeCategory);
-    syncCuisineButtons();
-
-    if (difficulty || category || cuisines) applyFilters();
-    applyForYouBadges();
+    highlightActive();   // light up the restored buttons
+    applyFilters();      // filter the grid to match
+    addForYouBadges();   // tag recommended recipes for logged-in users
 });

@@ -1,7 +1,7 @@
-﻿// recipe.js — servings scaler, ingredient checkbox persistence, and back-button
-// filter restoration for the individual Recipe detail page.
+// recipe.js — servings scaler, ingredient checkboxes, and a filter-preserving
+// Back button for the individual recipe page.
 
-/* ── 1. REFERENCES ───────────────────────────────────────────── */
+/* ── References ───────────────────────────────────────────────── */
 
 const backBtn = document.getElementById("back-btn");
 const scalerMinus = document.getElementById("scaler-minus");
@@ -10,179 +10,124 @@ const scalerValue = document.getElementById("scaler-value");
 const ingredientList = document.getElementById("ingredients-list");
 const clearBtn = document.getElementById("clear-checks-btn");
 
-// Recipe ID from the URL — used as the sessionStorage key for checked ingredients
+// Recipe id from the URL — used to key this recipe's checked ingredients
 const recipeId = new URLSearchParams(window.location.search).get("id");
-
 const STORAGE_KEY_CHECKS = "recipe_checks_" + recipeId;
 const STORAGE_KEY_FILTERS = "recipes_filters";
 
 
-/* ── 2. BACK BUTTON — preserve filters ───────────────────────── */
+/* ── Back button — keep the listing's filters ─────────────────── */
 
 if (backBtn) {
     backBtn.addEventListener("click", function (e) {
         e.preventDefault();
-
-        var saved = sessionStorage.getItem(STORAGE_KEY_FILTERS);
-        if (saved) {
-            // Filters were saved — go back with them as query params
-            window.location.href = "/Recipes.aspx?" + saved;
-        } else {
-            window.location.href = "/Recipes.aspx";
-        }
+        // Reapply saved filters if we have them, otherwise just go back to the list
+        const saved = sessionStorage.getItem(STORAGE_KEY_FILTERS);
+        window.location.href = saved ? "/Recipes.aspx?" + saved : "/Recipes.aspx";
     });
 }
 
 
-/* ── 3. QUANTITY PARSER ──────────────────────────────────────── */
+/* ── Quantity helpers ─────────────────────────────────────────── */
 
-// Parses a quantity string into a float, supporting integers, decimals, fractions and mixed numbers
+// Turn a quantity string ("2", "0.5", "1/2", "1 1/2") into a number, or null
+// if it isn't something we can scale (e.g. "to taste").
 function parseQuantity(str) {
     if (!str) return null;
 
-    var trimmed = str.trim();
+    let total = 0;
+    // Split on spaces so "1 1/2" becomes ["1", "1/2"], then add the pieces up
+    const tokens = str.trim().split(/\s+/);
 
-    // Plain integer or decimal
-    if (/^\d+(\.\d+)?$/.test(trimmed)) {
-        return parseFloat(trimmed);
-    }
-
-    // Simple fraction e.g. "1/2"
-    if (/^\d+\/\d+$/.test(trimmed)) {
-        var parts = trimmed.split("/");
-        return parseInt(parts[0]) / parseInt(parts[1]);
-    }
-
-    // Mixed number e.g. "1 1/2"
-    if (/^\d+\s+\d+\/\d+$/.test(trimmed)) {
-        var spaceIdx = trimmed.indexOf(" ");
-        var whole = parseInt(trimmed.substring(0, spaceIdx));
-        var fracParts = trimmed.substring(spaceIdx + 1).split("/");
-        return whole + (parseInt(fracParts[0]) / parseInt(fracParts[1]));
-    }
-
-    // Not a recognised numeric format — unscalable
-    return null;
-}
-
-
-/* ── 4. QUANTITY FORMATTER ───────────────────────────────────── */
-
-// Formats a float back to a human-readable fraction/mixed-number string where possible
-function formatQuantity(num) {
-    if (num === Math.floor(num)) {
-        // Whole number
-        return String(num);
-    }
-
-    // Try to express as a simple fraction or mixed number
-    var fractions = [
-        [1, 8], [1, 4], [1, 3], [3, 8],
-        [1, 2], [5, 8], [2, 3], [3, 4], [7, 8]
-    ];
-
-    var whole = Math.floor(num);
-    var remainder = num - whole;
-
-    for (var i = 0; i < fractions.length; i++) {
-        var n = fractions[i][0];
-        var d = fractions[i][1];
-
-        if (Math.abs(remainder - n / d) < 0.01) {
-            var fracStr = n + "/" + d;
-            return whole > 0 ? whole + " " + fracStr : fracStr;
+    for (const token of tokens) {
+        if (/^\d+\/\d+$/.test(token)) {            // a fraction like 1/2
+            const [top, bottom] = token.split("/");
+            total += Number(top) / Number(bottom);
+        } else if (/^\d+(\.\d+)?$/.test(token)) {  // a whole number or decimal
+            total += Number(token);
+        } else {
+            return null;                            // not a number — leave as-is
         }
     }
+    return total;
+}
 
-    // Fallback — round to 2 decimal places
+// Show a number cleanly as a decimal: 1.5, 2, 0.25 (rounded to 2 places).
+function formatQuantity(num) {
     return parseFloat(num.toFixed(2)).toString();
 }
 
 
-/* ── 5. SERVINGS SCALER ──────────────────────────────────────── */
+/* ── Servings scaler ──────────────────────────────────────────── */
 
-var currentServings = RecipeConfig.defaultServings;
-var minServings = 1;
-var maxServings = 100;
+let currentServings = RecipeConfig.defaultServings;
+const minServings = 1;
+const maxServings = 100;
 
-// Enables/disables +/- buttons at the min/max serving boundaries
+// Disable +/- at the min/max boundaries
 function updateScalerButtons() {
+    // Grey out "-" at the lowest serving count and "+" at the highest
     scalerMinus.disabled = currentServings <= minServings;
     scalerPlus.disabled = currentServings >= maxServings;
 }
 
-// Rescales all ingredient quantities to the current serving count using the original data-attribute values
+// Rescale every ingredient from its original amount to the current servings
 function scaleIngredients() {
-    var ratio = currentServings / RecipeConfig.defaultServings;
+    // How much bigger/smaller than the recipe's default serving count we are
+    const ratio = currentServings / RecipeConfig.defaultServings;
 
     document.querySelectorAll(".ingredient-quantity").forEach(function (el) {
-        var original = el.getAttribute("data-original");
-        var parsed = parseQuantity(original);
-
+        const parsed = parseQuantity(el.getAttribute("data-original"));
+        // Only rescale amounts we could parse; leave "to taste" etc. untouched
         if (parsed !== null) {
-            // Scalable quantity — multiply by ratio and format
             el.textContent = formatQuantity(parsed * ratio);
         }
-        // Unscalable — leave untouched (el.textContent stays as original)
     });
 
     scalerValue.textContent = currentServings;
     updateScalerButtons();
 }
 
-if (scalerMinus) {
-    scalerMinus.addEventListener("click", function () {
-        if (currentServings <= minServings) return;
-        currentServings--;
-        scaleIngredients();
-    });
+// Change servings by delta (clamped), then rescale
+function changeServings(delta) {
+    // Add delta but keep the result within [minServings, maxServings]
+    currentServings = Math.min(maxServings, Math.max(minServings, currentServings + delta));
+    scaleIngredients();
 }
 
-if (scalerPlus) {
-    scalerPlus.addEventListener("click", function () {
-        if (currentServings >= maxServings) return;
-        currentServings++;
-        scaleIngredients();
-    });
-}
+if (scalerMinus) scalerMinus.addEventListener("click", function () { changeServings(-1); });
+if (scalerPlus) scalerPlus.addEventListener("click", function () { changeServings(1); });
 
 
-/* ── 6. INGREDIENT CHECKBOXES ────────────────────────────────── */
+/* ── Ingredient checkboxes ────────────────────────────────────── */
 
-// Restores ingredient check marks from sessionStorage on page load
+// Restore checked ingredients (stored by position) from sessionStorage
 function loadCheckedState() {
-    var saved = sessionStorage.getItem(STORAGE_KEY_CHECKS);
+    const saved = sessionStorage.getItem(STORAGE_KEY_CHECKS);
     if (!saved) return;
 
-    var checkedIndexes = new Set(JSON.parse(saved));
-    var items = ingredientList.querySelectorAll(".ingredient-item");
-
-    items.forEach(function (item, index) {
-        if (checkedIndexes.has(index)) {
-            item.classList.add("checked");
-        }
+    // saved is a list of positions like [0, 2] — re-check those ingredients
+    const checked = new Set(JSON.parse(saved));
+    ingredientList.querySelectorAll(".ingredient-item").forEach(function (item, index) {
+        if (checked.has(index)) item.classList.add("checked");
     });
 }
 
-// Persists the checked ingredient indexes to sessionStorage by position, not by text
+// Save the indexes of the currently checked ingredients
 function saveCheckedState() {
-    var items = ingredientList.querySelectorAll(".ingredient-item");
-    var checked = [];
-
-    items.forEach(function (item, index) {
-        if (item.classList.contains("checked")) {
-            checked.push(index);
-        }
+    // Record the position of every checked ingredient
+    const checked = [];
+    ingredientList.querySelectorAll(".ingredient-item").forEach(function (item, index) {
+        if (item.classList.contains("checked")) checked.push(index);
     });
-
     sessionStorage.setItem(STORAGE_KEY_CHECKS, JSON.stringify(checked));
 }
 
 if (ingredientList) {
     ingredientList.addEventListener("click", function (e) {
-        var item = e.target.closest(".ingredient-item");
+        // Toggle the clicked ingredient and remember the new state
+        const item = e.target.closest(".ingredient-item");
         if (!item) return;
-
         item.classList.toggle("checked");
         saveCheckedState();
     });
@@ -190,6 +135,7 @@ if (ingredientList) {
 
 if (clearBtn) {
     clearBtn.addEventListener("click", function () {
+        // Uncheck everything and forget the saved state
         ingredientList.querySelectorAll(".ingredient-item.checked")
             .forEach(function (item) { item.classList.remove("checked"); });
         sessionStorage.removeItem(STORAGE_KEY_CHECKS);
@@ -197,9 +143,9 @@ if (clearBtn) {
 }
 
 
-/* ── 7. INITIALISE ───────────────────────────────────────────── */
+/* ── Initialise ───────────────────────────────────────────────── */
 
 document.addEventListener("DOMContentLoaded", function () {
-    updateScalerButtons();
-    loadCheckedState();
+    updateScalerButtons();   // set the initial +/- enabled state
+    loadCheckedState();      // restore any ingredients ticked earlier
 });

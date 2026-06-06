@@ -82,36 +82,19 @@ function updateProgress(remainingSecs, totalSecs) {
 function openSegmentEditor(segment) {
     state.editingSegment = segment;
 
-    const max = parseInt(segment.getAttribute("data-max"), 10);
-    segInput.max = max;
+    segInput.max = parseInt(segment.getAttribute("data-max"), 10);
     segInput.value = parseInt(segment.textContent, 10) || 0;
 
-    // Position the input over the segment
+    // Size and position the overlay over the clicked segment (the rest of the
+    // look comes from the .seg-input.active CSS rule)
     const rect = segment.getBoundingClientRect();
     const cardRect = segment.closest(".timer-card").getBoundingClientRect();
-
-    segInput.style.position = "absolute";
-    segInput.style.opacity = "1";
-    segInput.style.pointerEvents = "auto";
     segInput.style.width = rect.width + "px";
     segInput.style.height = rect.height + "px";
     segInput.style.top = (rect.top - cardRect.top) + "px";
     segInput.style.left = (rect.left - cardRect.left) + "px";
-    segInput.style.fontSize = "4.5rem";
-    segInput.style.fontFamily = "var(--font-heading)";
-    segInput.style.fontWeight = "400";
-    segInput.style.color = "var(--green-dark)";
-    segInput.style.background = "var(--green-soft)";
-    segInput.style.border = "2px solid var(--green-dark)";
-    segInput.style.borderRadius = "6px";
-    segInput.style.textAlign = "center";
-    segInput.style.outline = "none";
-    segInput.style.zIndex = "10";
-    segInput.style.lineHeight = "1";
-    segInput.style.padding = "4px 6px";
-    segInput.style.MozAppearance = "textfield";
-    segInput.style.appearance = "textfield";
 
+    segInput.classList.add("active");
     segInput.focus();
     segInput.select();
 }
@@ -120,14 +103,14 @@ function closeSegmentEditor(commit) {
     if (!state.editingSegment) return;
 
     if (commit) {
+        // Clamp the entered value to [0, data-max] before writing it back
         const max = parseInt(state.editingSegment.getAttribute("data-max"), 10);
         const val = Math.min(max, Math.max(0, parseInt(segInput.value, 10) || 0));
         state.editingSegment.textContent = pad(val);
     }
 
-    // Hide the input again
-    segInput.style.opacity = "0";
-    segInput.style.pointerEvents = "none";
+    // Hide the overlay again — base .seg-input rule (size 0, transparent) takes over
+    segInput.classList.remove("active");
     segInput.style.width = "0";
     segInput.style.height = "0";
     state.editingSegment = null;

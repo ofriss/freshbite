@@ -66,11 +66,12 @@ namespace Cooking_Website
             }
         }
 
-        // Renders unit with trailing space, or empty string if null
+        // Returns the unit followed by a space (e.g. "g "), or just a space when
+        // there's no unit — so the quantity is always separated from the name.
         protected string RenderUnit(object unit)
         {
             string val = unit?.ToString();
-            return !string.IsNullOrEmpty(val) ? val + " " : "";
+            return !string.IsNullOrEmpty(val) ? val + " " : " ";
         }
 
         protected string BuildIngredientsHtml()
@@ -78,16 +79,12 @@ namespace Cooking_Website
             var sb = new StringBuilder();
             foreach (var ing in CurrentRecipe.Ingredients)
             {
-                var qty = Enc(ing.Quantity?.ToString() ?? "");
-                var unit = Enc(RenderUnit(ing.Unit));
-                sb.Append("<li class=\"ingredient-item\">")
-                  .Append("<span class=\"ingredient-check\" aria-hidden=\"true\">&#10003;</span>")
-                  .Append("<span class=\"ingredient-text\">")
-                  .Append("<span class=\"ingredient-quantity\" data-original='").Append(qty).Append("'>").Append(qty).Append("</span>")
-                  .Append(unit)
-                  .Append("<span class=\"ingredient-name\">").Append(Enc(ing.Name)).Append("</span>")
-                  .Append("</span>")
-                  .Append("</li>");
+                var qty = ing.Quantity ?? "";
+                sb.Append($@"
+<li class=""ingredient-item"">
+  <span class=""ingredient-check"" aria-hidden=""true"">&#10003;</span>
+  <span class=""ingredient-text""><span class=""ingredient-quantity"" data-original='{qty}'>{qty}</span>{RenderUnit(ing.Unit)}<span class=""ingredient-name"">{ing.Name}</span></span>
+</li>");
             }
             return sb.ToString();
         }
@@ -96,7 +93,7 @@ namespace Cooking_Website
         {
             var sb = new StringBuilder();
             foreach (var step in CurrentRecipe.Steps)
-                sb.Append("<li><div class=\"step-body\">").Append(Enc(step)).Append("</div></li>");
+                sb.Append($@"<li><div class=""step-body"">{step}</div></li>");
             return sb.ToString();
         }
 
@@ -104,14 +101,8 @@ namespace Cooking_Website
         {
             var sb = new StringBuilder();
             foreach (var tip in CurrentRecipe.Tips)
-                sb.Append("<li><div class=\"tip-body\">").Append(Enc(tip)).Append("</div></li>");
+                sb.Append($@"<li><div class=""tip-body"">{tip}</div></li>");
             return sb.ToString();
-        }
-
-        // HTML-encodes a value for safe inline rendering (mirrors RenderCardImage's alt handling)
-        private static string Enc(object value)
-        {
-            return System.Web.HttpUtility.HtmlEncode(value?.ToString() ?? "");
         }
 
         // Maps difficulty to a numeric rank for comparison
