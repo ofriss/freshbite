@@ -1,5 +1,4 @@
 using Cooking_Website.DAL;
-using System;
 using System.Text;
 using System.Web.UI;
 
@@ -8,21 +7,6 @@ namespace Cooking_Website
     public partial class Recipes : Page
     {
         private readonly RecipeRepository _repo = new RecipeRepository();
-
-        // Sets guest banner visibility and populates hidden profile fields for JS
-        protected void Page_Load(object sender, EventArgs e)
-        {
-            bool isLoggedIn = Session["Id"] != null;
-
-            GuestBanner.Visible = !isLoggedIn;
-
-            if (isLoggedIn)
-            {
-                int userId = (int)Session["Id"];
-                HiddenDifficulty.Value = _repo.GetUserSkillLevel(userId) ?? "";
-                HiddenCuisines.Value = string.Join(",", _repo.GetUserFavouriteCuisines(userId));
-            }
-        }
 
         protected string BuildRecipeCardsHtml()
         {
@@ -47,14 +31,6 @@ namespace Cooking_Website
   </div>
 </a>");
             }
-            return sb.ToString();
-        }
-
-        protected string BuildCuisineButtonsHtml()
-        {
-            var sb = new StringBuilder();
-            foreach (var cuisine in _repo.GetDistinctCuisines())
-                sb.Append($@"<button class=""filter-btn"" data-filter-type=""cuisine"" data-filter=""{cuisine}"" type=""button"">{cuisine}</button>");
             return sb.ToString();
         }
 

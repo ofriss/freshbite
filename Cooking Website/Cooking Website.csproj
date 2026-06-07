@@ -103,7 +103,6 @@
     <Content Include="js\profile.js" />
     <Content Include="js\quiz.js" />
     <Content Include="js\recipe.js" />
-    <Content Include="js\recipes.js" />
     <Content Include="js\register.js" />
     <Content Include="js\substitutions.js" />
     <Content Include="js\timer.js" />

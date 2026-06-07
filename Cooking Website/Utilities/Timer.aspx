@@ -10,24 +10,20 @@
 
     <div class="timer-card">
 
-        <!-- Editable time display — click any segment to edit when idle -->
-        <div class="timer-display" id="timer-display" title="Click to edit">
-            <span class="time-seg" id="seg-hours"   data-max="99">00</span>
-            <span class="time-colon">:</span>
-            <span class="time-seg" id="seg-minutes" data-max="59">05</span>
-            <span class="time-colon">:</span>
-            <span class="time-seg" id="seg-seconds" data-max="59">00</span>
+        <!-- Time entry: three plain number inputs for hours / minutes / seconds -->
+        <div class="timer-inputs" id="timer-inputs">
+            <label>H<input id="inp-hours"   type="number" min="0" max="99" value="0" /></label>
+            <label>M<input id="inp-minutes" type="number" min="0" max="59" value="5" /></label>
+            <label>S<input id="inp-seconds" type="number" min="0" max="59" value="0" /></label>
         </div>
 
-        <!-- Hidden input that overlays a segment when editing -->
-        <input class="seg-input" id="seg-input" type="number" min="0" autocomplete="off" />
+        <!-- Countdown readout (and "Done!" when finished) -->
+        <div class="timer-display" id="timer-display">00:05:00</div>
 
-        <!-- Single Start / Stop button -->
-        <button class="timer-btn" id="timer-btn" type="button">Start</button>
-
-        <!-- Thin progress bar at the bottom of the card -->
-        <div class="progress-bar-track">
-            <div class="progress-bar-fill" id="progress-fill"></div>
+        <!-- Start/Pause toggle and Reset -->
+        <div class="timer-buttons">
+            <button class="timer-btn" id="btn-start" type="button">Start</button>
+            <button class="timer-btn secondary" id="btn-reset" type="button">Reset</button>
         </div>
 
     </div>

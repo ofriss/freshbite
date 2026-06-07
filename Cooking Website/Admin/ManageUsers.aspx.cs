@@ -96,33 +96,11 @@ namespace Cooking_Website.Admin
         // Reads form values written by manage-users.js, validates, then inserts a new user
         protected void BtnCreate_Click(object sender, EventArgs e)
         {
-            string username = Request.Form["mu-username"] ?? "";
-            string password = Request.Form["mu-password"] ?? "";
-            string birthday = Request.Form["mu-birthday"] ?? "";
-            string gender = Request.Form["mu-gender"] ?? "";
-            string cuisine = Request.Form["mu-cuisine"] ?? "";
-            string skill = Request.Form["mu-skill"] ?? "";
+            var f = ReadForm();
 
-            // Server-side validation — wrapped in try-catch so a DB error inside
-            // DoesUserExist (username duplicate check) shows a friendly message
-            string validationMessage;
-            try
-            {
-                validationMessage = ValidateForm(username, password, birthday, gender, cuisine, skill, isCreate: true, userId: 0);
-            }
-            catch
-            {
-                ShowMessage("Something went wrong while validating. Please try again.", System.Drawing.Color.Red);
-                BindUsers();
+            // Validate (shows the message + refreshes the table itself on failure)
+            if (!TryValidate(f, isCreate: true, userId: 0))
                 return;
-            }
-
-            if (validationMessage != null)
-            {
-                ShowMessage(validationMessage, System.Drawing.Color.Red);
-                BindUsers();
-                return;
-            }
 
             try
             {
@@ -131,12 +109,12 @@ namespace Cooking_Website.Admin
                     INSERT INTO Users (Username, Password, Birthday, Gender, Cuisine, Skill)
                     VALUES (@Username, @Password, @Birthday, @Gender, @Cuisine, @Skill)", con))
                 {
-                    cmd.Parameters.AddWithValue("@Username", username);
-                    cmd.Parameters.AddWithValue("@Password", password);
-                    cmd.Parameters.AddWithValue("@Birthday", DateTime.Parse(birthday));
-                    cmd.Parameters.AddWithValue("@Gender", gender);
-                    cmd.Parameters.AddWithValue("@Cuisine", cuisine);
-                    cmd.Parameters.AddWithValue("@Skill", skill);
+                    cmd.Parameters.AddWithValue("@Username", f.Username);
+                    cmd.Parameters.AddWithValue("@Password", f.Password);
+                    cmd.Parameters.AddWithValue("@Birthday", DateTime.Parse(f.Birthday));
+                    cmd.Parameters.AddWithValue("@Gender", f.Gender);
+                    cmd.Parameters.AddWithValue("@Cuisine", f.Cuisine);
+                    cmd.Parameters.AddWithValue("@Skill", f.Skill);
                     con.Open();
                     cmd.ExecuteNonQuery();
                 }
@@ -157,12 +135,7 @@ namespace Cooking_Website.Admin
         protected void BtnEdit_Click(object sender, EventArgs e)
         {
             string idStr = Request.Form["mu-id"] ?? "0";
-            string username = Request.Form["mu-username"] ?? "";
-            string password = Request.Form["mu-password"] ?? "";
-            string birthday = Request.Form["mu-birthday"] ?? "";
-            string gender = Request.Form["mu-gender"] ?? "";
-            string cuisine = Request.Form["mu-cuisine"] ?? "";
-            string skill = Request.Form["mu-skill"] ?? "";
+            var f = ReadForm();
 
             if (!int.TryParse(idStr, out int userId) || userId == 0)
             {
@@ -171,31 +144,14 @@ namespace Cooking_Website.Admin
                 return;
             }
 
-            // Server-side validation — wrapped in try-catch so a DB error inside
-            // DoesUserExist (username duplicate check) shows a friendly message
-            string validationMessage;
-            try
-            {
-                validationMessage = ValidateForm(username, password, birthday, gender, cuisine, skill, isCreate: false, userId: userId);
-            }
-            catch
-            {
-                ShowMessage("Something went wrong while validating. Please try again.", System.Drawing.Color.Red);
-                BindUsers();
+            // Validate (shows the message + refreshes the table itself on failure)
+            if (!TryValidate(f, isCreate: false, userId: userId))
                 return;
-            }
-
-            if (validationMessage != null)
-            {
-                ShowMessage(validationMessage, System.Drawing.Color.Red);
-                BindUsers();
-                return;
-            }
 
             try
             {
                 // Leave password out of the query if blank — keep existing
-                string sql = string.IsNullOrWhiteSpace(password)
+                string sql = string.IsNullOrWhiteSpace(f.Password)
                     ? @"UPDATE Users SET Username=@Username, Birthday=@Birthday,
                               Gender=@Gender, Cuisine=@Cuisine, Skill=@Skill WHERE Id=@Id"
                     : @"UPDATE Users SET Username=@Username, Password=@Password,
@@ -206,14 +162,14 @@ namespace Cooking_Website.Admin
                 using (var cmd = new SqlCommand(sql, con))
                 {
                     cmd.Parameters.AddWithValue("@Id", userId);
-                    cmd.Parameters.AddWithValue("@Username", username);
-                    cmd.Parameters.AddWithValue("@Birthday", DateTime.Parse(birthday));
-                    cmd.Parameters.AddWithValue("@Gender", gender);
-                    cmd.Parameters.AddWithValue("@Cuisine", cuisine);
-                    cmd.Parameters.AddWithValue("@Skill", skill);
+                    cmd.Parameters.AddWithValue("@Username", f.Username);
+                    cmd.Parameters.AddWithValue("@Birthday", DateTime.Parse(f.Birthday));
+                    cmd.Parameters.AddWithValue("@Gender", f.Gender);
+                    cmd.Parameters.AddWithValue("@Cuisine", f.Cuisine);
+                    cmd.Parameters.AddWithValue("@Skill", f.Skill);
 
-                    if (!string.IsNullOrWhiteSpace(password))
-                        cmd.Parameters.AddWithValue("@Password", password);
+                    if (!string.IsNullOrWhiteSpace(f.Password))
+                        cmd.Parameters.AddWithValue("@Password", f.Password);
 
                     con.Open();
                     cmd.ExecuteNonQuery();
@@ -377,7 +333,60 @@ namespace Cooking_Website.Admin
             return null;
         }
 
-        // ── Helper ────────────────────────────────────────────────
+        // ── Helpers ───────────────────────────────────────────────
+
+        // Holds the six user fields submitted by manage-users.js via hidden inputs
+        private class UserForm
+        {
+            public string Username;
+            public string Password;
+            public string Birthday;
+            public string Gender;
+            public string Cuisine;
+            public string Skill;
+        }
+
+        // Reads the mu-* hidden fields written by manage-users.js (used by Create and Edit)
+        private UserForm ReadForm()
+        {
+            return new UserForm
+            {
+                Username = Request.Form["mu-username"] ?? "",
+                Password = Request.Form["mu-password"] ?? "",
+                Birthday = Request.Form["mu-birthday"] ?? "",
+                Gender = Request.Form["mu-gender"] ?? "",
+                Cuisine = Request.Form["mu-cuisine"] ?? "",
+                Skill = Request.Form["mu-skill"] ?? ""
+            };
+        }
+
+        // Runs server-side validation guarded by try-catch (so a DB error inside the
+        // DoesUserExist duplicate check shows a friendly message). On any problem it
+        // shows the message, refreshes the table, and returns false; true only when valid.
+        private bool TryValidate(UserForm f, bool isCreate, int userId)
+        {
+            string validationMessage;
+            try
+            {
+                validationMessage = ValidateForm(f.Username, f.Password, f.Birthday,
+                    f.Gender, f.Cuisine, f.Skill, isCreate, userId);
+            }
+            catch
+            {
+                ShowMessage("Something went wrong while validating. Please try again.", System.Drawing.Color.Red);
+                BindUsers();
+                return false;
+            }
+
+            if (validationMessage != null)
+            {
+                ShowMessage(validationMessage, System.Drawing.Color.Red);
+                BindUsers();
+                return false;
+            }
+
+            return true;
+        }
 
         // Sets the result label text and colour in one call
         private void ShowMessage(string text, System.Drawing.Color color)

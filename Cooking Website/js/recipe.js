@@ -3,7 +3,6 @@
 
 /* ── References ───────────────────────────────────────────────── */
 
-const backBtn = document.getElementById("back-btn");
 const scalerMinus = document.getElementById("scaler-minus");
 const scalerPlus = document.getElementById("scaler-plus");
 const scalerValue = document.getElementById("scaler-value");
@@ -13,19 +12,6 @@ const clearBtn = document.getElementById("clear-checks-btn");
 // Recipe id from the URL — used to key this recipe's checked ingredients
 const recipeId = new URLSearchParams(window.location.search).get("id");
 const STORAGE_KEY_CHECKS = "recipe_checks_" + recipeId;
-const STORAGE_KEY_FILTERS = "recipes_filters";
-
-
-/* ── Back button — keep the listing's filters ─────────────────── */
-
-if (backBtn) {
-    backBtn.addEventListener("click", function (e) {
-        e.preventDefault();
-        // Reapply saved filters if we have them, otherwise just go back to the list
-        const saved = sessionStorage.getItem(STORAGE_KEY_FILTERS);
-        window.location.href = saved ? "/Recipes.aspx?" + saved : "/Recipes.aspx";
-    });
-}
 
 
 /* ── Quantity helpers ─────────────────────────────────────────── */

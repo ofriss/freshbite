@@ -1,4 +1,4 @@
-﻿using Cooking_Website.Helpers;
+using Cooking_Website.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -9,15 +9,15 @@ namespace Cooking_Website.DAL
     // Lightweight model for listing recipes (no related data)
     public class Recipe
     {
-        public int Id { get; set; }
-        public string Title { get; set; }
-        public string Description { get; set; }
-        public string Category { get; set; }
-        public string Cuisine { get; set; }
-        public string Difficulty { get; set; }
-        public int PrepTime { get; set; }
-        public int CookTime { get; set; }
-        public int Servings { get; set; }
+        public int Id { get; set; } // the recipe id
+        public string Title { get; set; } // the title of the recipe
+        public string Description { get; set; } // the description of the recipe
+        public string Category { get; set; } // the category of the recipe (e.g. Meat)
+        public string Cuisine { get; set; } // the cuisine of the recipe (e.g. Mexican)
+        public string Difficulty { get; set; } // the difficulty of the recipe (e.g. Hard)
+        public int PrepTime { get; set; } // the preperation time
+        public int CookTime { get; set; } // the cookig time
+        public int Servings { get; set; } // the default servings
         public string ImageUrl { get; set; }  // nullable
     }
 
@@ -36,43 +36,57 @@ namespace Cooking_Website.DAL
         public string Name { get; set; }
     }
 
-    // DAL for all recipe-related queries; mutations wrap child inserts in a transaction
+    // DAL for all recipe-related queries. Reads use SqlDataAdapter + DataTable
     public class RecipeRepository
     {
         private readonly string _conn = SqlHelper.LoadConnectionString();
 
         // ── Helpers ──────────────────────────────────────────────
 
-        // Returns null for DB NULL strings rather than throwing on GetString
-        private string SafeString(IDataReader r, string column)
+        // Loads a parameterless query into a DataTable
+        private DataTable LoadTable(string sql)
         {
-            int ordinal = r.GetOrdinal(column);
-            return r.IsDBNull(ordinal) ? null : r.GetString(ordinal);
+            return LoadTable(sql, null);
         }
 
-        // Returns 0 for DB NULL ints rather than throwing on GetInt32
-        private int SafeInt(IDataReader r, string column)
+        // Loads a query into a DataTable, optionally binding a single @Id parameter
+        private DataTable LoadTable(string sql, int? id)
         {
-            int ordinal = r.GetOrdinal(column);
-            return r.IsDBNull(ordinal) ? 0 : r.GetInt32(ordinal);
-        }
-
-        // Maps the current reader row to a Recipe object
-        private Recipe MapRecipe(IDataReader r)
-        {
-            return new Recipe
+            var table = new DataTable();
+            using (var con = new SqlConnection(_conn))
+            using (var da = new SqlDataAdapter(sql, con))
             {
-                Id = r.GetInt32(r.GetOrdinal("Id")),
-                Title = SafeString(r, "Title"),
-                Description = SafeString(r, "Description"),
-                Category = SafeString(r, "Category"),
-                Cuisine = SafeString(r, "Cuisine"),
-                Difficulty = SafeString(r, "Difficulty"),
-                PrepTime = SafeInt(r, "PrepTime"),
-                CookTime = SafeInt(r, "CookTime"),
-                Servings = SafeInt(r, "Servings"),
-                ImageUrl = SafeString(r, "ImageUrl")
-            };
+                if (id.HasValue)
+                    da.SelectCommand.Parameters.AddWithValue("@Id", id.Value);
+                da.Fill(table);
+            }
+            return table;
+        }
+
+        // Copies the base recipe columns from a DataRow into a Recipe (or RecipeDetail).
+        // Strings use "as string" so a DB NULL becomes null (DBNull is not a string);
+        // the nullable int columns fall back to 0 on NULL (note: Convert.ToInt32(DBNull.Value)
+        // would throw, hence the explicit guard).
+        private void FillRecipe(Recipe r, DataRow row)
+        {
+            r.Id = Convert.ToInt32(row["Id"]);
+            r.Title = row["Title"] as string;
+            r.Description = row["Description"] as string;
+            r.Category = row["Category"] as string;
+            r.Cuisine = row["Cuisine"] as string;
+            r.Difficulty = row["Difficulty"] as string;
+            r.PrepTime = row["PrepTime"] == DBNull.Value ? 0 : Convert.ToInt32(row["PrepTime"]);
+            r.CookTime = row["CookTime"] == DBNull.Value ? 0 : Convert.ToInt32(row["CookTime"]);
+            r.Servings = row["Servings"] == DBNull.Value ? 0 : Convert.ToInt32(row["Servings"]);
+            r.ImageUrl = row["ImageUrl"] as string;
+        }
+
+        // Maps a DataRow to a new Recipe
+        private Recipe MapRecipe(DataRow row)
+        {
+            var r = new Recipe();
+            FillRecipe(r, row);
+            return r;
         }
 
         // ── Recipes ───────────────────────────────────────────────
@@ -82,15 +96,9 @@ namespace Cooking_Website.DAL
         {
             var list = new List<Recipe>();
 
-            using (var con = new SqlConnection(_conn))
-            using (var cmd = new SqlCommand(
-                "SELECT * FROM Recipes ORDER BY CreatedAt DESC", con))
-            {
-                con.Open();
-                using (var reader = cmd.ExecuteReader())
-                    while (reader.Read())
-                        list.Add(MapRecipe(reader));
-            }
+            DataTable table = LoadTable("SELECT * FROM Recipes ORDER BY CreatedAt DESC");
+            foreach (DataRow row in table.Rows)
+                list.Add(MapRecipe(row));
 
             return list;
         }
@@ -98,171 +106,41 @@ namespace Cooking_Website.DAL
         // Fetches a recipe with all ingredients, steps (ordered), and tips; returns null if not found
         public RecipeDetail GetRecipeById(int id)
         {
-            RecipeDetail recipe = null;
+            // Base recipe — bail out with null when there's no matching row
+            DataTable recipeTable = LoadTable("SELECT * FROM Recipes WHERE Id = @Id", id);
+            if (recipeTable.Rows.Count == 0)
+                return null;
 
-            using (var con = new SqlConnection(_conn))
+            var recipe = new RecipeDetail
             {
-                con.Open();
+                Ingredients = new List<Ingredient>(),
+                Steps = new List<string>(),
+                Tips = new List<string>()
+            };
+            FillRecipe(recipe, recipeTable.Rows[0]);   // populate the base recipe columns
 
-                // Base recipe
-                using (var cmd = new SqlCommand(
-                    "SELECT * FROM Recipes WHERE Id = @Id", con))
+            // Ingredients
+            DataTable ingTable = LoadTable("SELECT * FROM RecipeIngredients WHERE RecipeId = @Id", id);
+            foreach (DataRow row in ingTable.Rows)
+                recipe.Ingredients.Add(new Ingredient
                 {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (var r = cmd.ExecuteReader())
-                    {
-                        if (r.Read())
-                        {
-                            recipe = new RecipeDetail
-                            {
-                                Id = r.GetInt32(r.GetOrdinal("Id")),
-                                Title = SafeString(r, "Title"),
-                                Description = SafeString(r, "Description"),
-                                Category = SafeString(r, "Category"),
-                                Cuisine = SafeString(r, "Cuisine"),
-                                Difficulty = SafeString(r, "Difficulty"),
-                                PrepTime = SafeInt(r, "PrepTime"),
-                                CookTime = SafeInt(r, "CookTime"),
-                                Servings = SafeInt(r, "Servings"),
-                                ImageUrl = SafeString(r, "ImageUrl")
-                            };
-                        }
-                    }
-                }
+                    Quantity = row["Quantity"] as string,
+                    Unit = row["Unit"] as string,
+                    Name = row["Name"] as string
+                });
 
-                if (recipe == null) return null;
+            // Steps (in order)
+            DataTable stepTable = LoadTable(
+                "SELECT Instruction FROM RecipeSteps WHERE RecipeId = @Id ORDER BY StepNumber", id);
+            foreach (DataRow row in stepTable.Rows)
+                recipe.Steps.Add(row["Instruction"] as string);
 
-                // Ingredients
-                recipe.Ingredients = new List<Ingredient>();
-                using (var cmd = new SqlCommand(
-                    "SELECT * FROM RecipeIngredients WHERE RecipeId = @Id", con))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (var r = cmd.ExecuteReader())
-                        while (r.Read())
-                            recipe.Ingredients.Add(new Ingredient
-                            {
-                                Quantity = SafeString(r, "Quantity"),
-                                Unit = SafeString(r, "Unit"),
-                                Name = SafeString(r, "Name")
-                            });
-                }
-
-                // Steps
-                recipe.Steps = new List<string>();
-                using (var cmd = new SqlCommand(
-                    "SELECT Instruction FROM RecipeSteps WHERE RecipeId = @Id ORDER BY StepNumber", con))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (var r = cmd.ExecuteReader())
-                        while (r.Read())
-                            recipe.Steps.Add(SafeString(r, "Instruction"));
-                }
-
-                // Tips
-                recipe.Tips = new List<string>();
-                using (var cmd = new SqlCommand(
-                    "SELECT Tip FROM RecipeTips WHERE RecipeId = @Id", con))
-                {
-                    cmd.Parameters.AddWithValue("@Id", id);
-                    using (var r = cmd.ExecuteReader())
-                        while (r.Read())
-                            recipe.Tips.Add(SafeString(r, "Tip"));
-                }
-            }
+            // Tips
+            DataTable tipTable = LoadTable("SELECT Tip FROM RecipeTips WHERE RecipeId = @Id", id);
+            foreach (DataRow row in tipTable.Rows)
+                recipe.Tips.Add(row["Tip"] as string);
 
             return recipe;
-        }
-
-        // ── Filters ───────────────────────────────────────────────
-
-        // Returns distinct cuisines sorted alphabetically with "Other" always last
-        public List<string> GetDistinctCuisines()
-        {
-            var list = new List<string>();
-
-            using (var con = new SqlConnection(_conn))
-            using (var cmd = new SqlCommand(@"
-                SELECT Cuisine FROM (
-                    SELECT DISTINCT Cuisine,
-                        CASE WHEN Cuisine = 'Other' THEN 1 ELSE 0 END AS SortOrder
-                    FROM Recipes
-                    WHERE Cuisine IS NOT NULL
-                ) AS sub
-                ORDER BY SortOrder, Cuisine", con))
-            {
-                con.Open();
-                using (var r = cmd.ExecuteReader())
-                    while (r.Read())
-                        list.Add(SafeString(r, "Cuisine"));
-            }
-
-            return list;
-        }
-
-        // ── Users ─────────────────────────────────────────────────
-
-        // Returns the user's skill as "Easy", "Medium", or "Hard"; normalises DB variants; null if unknown
-        public string GetUserSkillLevel(int userId)
-        {
-            using (var con = new SqlConnection(_conn))
-            using (var cmd = new SqlCommand(
-                "SELECT Skill FROM Users WHERE Id = @Id", con))
-            {
-                cmd.Parameters.AddWithValue("@Id", userId);
-                con.Open();
-                var result = cmd.ExecuteScalar();
-
-                if (result == null || result == DBNull.Value)
-                    return null;
-
-                switch (result.ToString().Trim().ToLower())
-                {
-                    case "easy":
-                    case "beginner":
-                        return "Easy";
-
-                    case "medium":
-                    case "intermediate":
-                        return "Medium";
-
-                    case "hard":
-                    case "advanced":
-                    case "expert":
-                        return "Hard";
-
-                    default:
-                        return null;   // unknown value — don't assume
-                }
-            }
-        }
-
-        // Returns the user's favourite cuisines as a list; parses the comma-delimited Cuisine column
-        public List<string> GetUserFavouriteCuisines(int userId)
-        {
-            using (var con = new SqlConnection(_conn))
-            using (var cmd = new SqlCommand(
-                "SELECT Cuisine FROM Users WHERE Id = @Id", con))
-            {
-                cmd.Parameters.AddWithValue("@Id", userId);
-                con.Open();
-                var result = cmd.ExecuteScalar();
-
-                if (result == null || result == DBNull.Value)
-                    return new List<string>();
-
-                var list = new List<string>();
-                foreach (var item in result.ToString().Split(','))
-                {
-                    var trimmed = item.Trim();
-                    if (string.IsNullOrEmpty(trimmed)) continue;
-
-                    // Normalise casing to match the Recipes table
-                    var normalised = char.ToUpper(trimmed[0]) + trimmed.Substring(1).ToLower();
-                    list.Add(normalised);
-                }
-                return list;
-            }
         }
 
         // ── Insert ────────────────────────────────────────────────
@@ -299,45 +177,8 @@ namespace Cooking_Website.DAL
 
                         int newId = Convert.ToInt32(cmd.ExecuteScalar());
 
-                        foreach (var ing in recipe.Ingredients)
-                        {
-                            var ingCmd = new SqlCommand(@"
-                                INSERT INTO RecipeIngredients (RecipeId, Quantity, Unit, Name)
-                                VALUES (@RecipeId, @Quantity, @Unit, @Name)", con, transaction);
-
-                            ingCmd.Parameters.AddWithValue("@RecipeId", newId);
-                            ingCmd.Parameters.AddWithValue("@Quantity", ing.Quantity);
-                            ingCmd.Parameters.AddWithValue("@Unit",
-                                (object)ing.Unit ?? DBNull.Value);
-                            ingCmd.Parameters.AddWithValue("@Name", ing.Name);
-                            ingCmd.ExecuteNonQuery();
-                        }
-
-                        for (int i = 0; i < recipe.Steps.Count; i++)
-                        {
-                            var stepCmd = new SqlCommand(@"
-                                INSERT INTO RecipeSteps (RecipeId, StepNumber, Instruction)
-                                VALUES (@RecipeId, @StepNumber, @Instruction)", con, transaction);
-
-                            stepCmd.Parameters.AddWithValue("@RecipeId", newId);
-                            stepCmd.Parameters.AddWithValue("@StepNumber", i + 1);
-                            stepCmd.Parameters.AddWithValue("@Instruction", recipe.Steps[i]);
-                            stepCmd.ExecuteNonQuery();
-                        }
-
-                        if (recipe.Tips != null)
-                        {
-                            foreach (var tip in recipe.Tips)
-                            {
-                                var tipCmd = new SqlCommand(@"
-                                    INSERT INTO RecipeTips (RecipeId, Tip)
-                                    VALUES (@RecipeId, @Tip)", con, transaction);
-
-                                tipCmd.Parameters.AddWithValue("@RecipeId", newId);
-                                tipCmd.Parameters.AddWithValue("@Tip", tip);
-                                tipCmd.ExecuteNonQuery();
-                            }
-                        }
+                        // Insert ingredients, steps, and tips for the new recipe
+                        InsertChildRows(con, transaction, newId, recipe);
 
                         transaction.Commit();
                         return newId;
@@ -398,45 +239,8 @@ namespace Cooking_Website.DAL
                             delCmd.ExecuteNonQuery();
                         }
 
-                        foreach (var ing in recipe.Ingredients)
-                        {
-                            var ingCmd = new SqlCommand(@"
-                                INSERT INTO RecipeIngredients (RecipeId, Quantity, Unit, Name)
-                                VALUES (@RecipeId, @Quantity, @Unit, @Name)", con, transaction);
-
-                            ingCmd.Parameters.AddWithValue("@RecipeId", recipe.Id);
-                            ingCmd.Parameters.AddWithValue("@Quantity", ing.Quantity);
-                            ingCmd.Parameters.AddWithValue("@Unit",
-                                (object)ing.Unit ?? DBNull.Value);
-                            ingCmd.Parameters.AddWithValue("@Name", ing.Name);
-                            ingCmd.ExecuteNonQuery();
-                        }
-
-                        for (int i = 0; i < recipe.Steps.Count; i++)
-                        {
-                            var stepCmd = new SqlCommand(@"
-                                INSERT INTO RecipeSteps (RecipeId, StepNumber, Instruction)
-                                VALUES (@RecipeId, @StepNumber, @Instruction)", con, transaction);
-
-                            stepCmd.Parameters.AddWithValue("@RecipeId", recipe.Id);
-                            stepCmd.Parameters.AddWithValue("@StepNumber", i + 1);
-                            stepCmd.Parameters.AddWithValue("@Instruction", recipe.Steps[i]);
-                            stepCmd.ExecuteNonQuery();
-                        }
-
-                        if (recipe.Tips != null)
-                        {
-                            foreach (var tip in recipe.Tips)
-                            {
-                                var tipCmd = new SqlCommand(@"
-                                    INSERT INTO RecipeTips (RecipeId, Tip)
-                                    VALUES (@RecipeId, @Tip)", con, transaction);
-
-                                tipCmd.Parameters.AddWithValue("@RecipeId", recipe.Id);
-                                tipCmd.Parameters.AddWithValue("@Tip", tip);
-                                tipCmd.ExecuteNonQuery();
-                            }
-                        }
+                        // Re-insert ingredients, steps, and tips from the updated recipe
+                        InsertChildRows(con, transaction, recipe.Id, recipe);
 
                         transaction.Commit();
                     }
@@ -445,6 +249,53 @@ namespace Cooking_Website.DAL
                         transaction.Rollback();
                         throw;
                     }
+                }
+            }
+        }
+
+        // ── Shared child-row insert ───────────────────────────────
+
+        // Inserts a recipe's ingredients, numbered steps, and tips (tips only when present).
+        // Shared by InsertRecipe and UpdateRecipe so the insert logic lives in one place.
+        private void InsertChildRows(SqlConnection con, SqlTransaction transaction, int recipeId, RecipeDetail recipe)
+        {
+            foreach (var ing in recipe.Ingredients)
+            {
+                var ingCmd = new SqlCommand(@"
+                    INSERT INTO RecipeIngredients (RecipeId, Quantity, Unit, Name)
+                    VALUES (@RecipeId, @Quantity, @Unit, @Name)", con, transaction);
+
+                ingCmd.Parameters.AddWithValue("@RecipeId", recipeId);
+                ingCmd.Parameters.AddWithValue("@Quantity", ing.Quantity);
+                ingCmd.Parameters.AddWithValue("@Unit",
+                    (object)ing.Unit ?? DBNull.Value);
+                ingCmd.Parameters.AddWithValue("@Name", ing.Name);
+                ingCmd.ExecuteNonQuery();
+            }
+
+            for (int i = 0; i < recipe.Steps.Count; i++)
+            {
+                var stepCmd = new SqlCommand(@"
+                    INSERT INTO RecipeSteps (RecipeId, StepNumber, Instruction)
+                    VALUES (@RecipeId, @StepNumber, @Instruction)", con, transaction);
+
+                stepCmd.Parameters.AddWithValue("@RecipeId", recipeId);
+                stepCmd.Parameters.AddWithValue("@StepNumber", i + 1);
+                stepCmd.Parameters.AddWithValue("@Instruction", recipe.Steps[i]);
+                stepCmd.ExecuteNonQuery();
+            }
+
+            if (recipe.Tips != null)
+            {
+                foreach (var tip in recipe.Tips)
+                {
+                    var tipCmd = new SqlCommand(@"
+                        INSERT INTO RecipeTips (RecipeId, Tip)
+                        VALUES (@RecipeId, @Tip)", con, transaction);
+
+                    tipCmd.Parameters.AddWithValue("@RecipeId", recipeId);
+                    tipCmd.Parameters.AddWithValue("@Tip", tip);
+                    tipCmd.ExecuteNonQuery();
                 }
             }
         }

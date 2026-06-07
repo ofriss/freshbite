@@ -1,7 +1,7 @@
-﻿// units-calculator.js — converts a single volume or mass amount into every other unit, shown as result cards
+// units-calculator.js — converts a single volume or mass amount into every other unit, shown as result cards
 
 /* ── 1. CONVERSION DATA ─────────────────────────────────────── */
-
+// Each unit stores how many base units it equals (ml for volume, g for mass).
 
 const VOLUME_UNITS = [
     { key: "ml", label: "Millilitre", abbr: "ml", factor: 1 },
@@ -24,26 +24,7 @@ const MASS_UNITS = [
 ];
 
 
-/* ── 2. CONVERSION LOGIC ─────────────────────────────────────── */
-
-function convert(amount, fromKey, unitList) {
-    const fromUnit = unitList.find(u => u.key === fromKey);
-    if (!fromUnit || isNaN(amount) || amount === "") return null;
-
-    // Step 1: convert input → base unit
-    const inBaseUnits = amount * fromUnit.factor;
-
-    // Step 2: convert base unit → every other unit and return a map
-    const results = {};
-    unitList.forEach(function (unit) {
-        results[unit.key] = inBaseUnits / unit.factor;
-    });
-
-    return results;
-}
-
-
-/* ── 3. NUMBER FORMATTING ────────────────────────────────────── */
+/* ── 2. NUMBER FORMATTING ────────────────────────────────────── */
 
 function formatNumber(value) {
     if (value === 0) return "0";
@@ -60,51 +41,45 @@ function formatNumber(value) {
 }
 
 
-/* ── 4. RENDERING RESULT CARDS ───────────────────────────────── */
+/* ── 3. RENDER A CONVERSION ──────────────────────────────────── */
+// Reads the panel's amount + chosen unit and rebuilds its result cards.
+// One step: convert input -> base units (amount * fromUnit.factor), then
+// base units -> each unit (/ unit.factor). No intermediate map needed.
 
-function renderResults(resultsMap, fromKey, unitList, gridElement) {
-    // Clear whatever was there before
-    gridElement.innerHTML = "";
+function renderConversions(amountId, unitId, units, gridId) {
+    const amount = parseFloat(document.getElementById(amountId).value);
+    const fromKey = document.getElementById(unitId).value;
+    const grid = document.getElementById(gridId);
+    const fromUnit = units.find(u => u.key === fromKey);
 
-    // No value entered yet → show a friendly prompt
-    if (resultsMap === null) {
-        gridElement.innerHTML = '<p class="results-placeholder">Enter an amount above to see conversions.</p>';
+    grid.innerHTML = "";
+
+    // No (or invalid) amount entered yet → show a friendly prompt
+    if (!fromUnit || isNaN(amount)) {
+        grid.innerHTML = '<p class="results-placeholder">Enter an amount above to see conversions.</p>';
         return;
     }
 
-    // Build one card per unit
-    unitList.forEach(function (unit) {
-        const convertedValue = resultsMap[unit.key];
-        const isSource = (unit.key === fromKey);   // highlight the "from" unit
+    const inBaseUnits = amount * fromUnit.factor;
+
+    // Build one card per unit, highlighting the "from" unit
+    units.forEach(function (unit) {
+        const value = inBaseUnits / unit.factor;
+        const isSource = (unit.key === fromKey);
 
         const card = document.createElement("div");
         card.className = "result-card" + (isSource ? " is-source" : "");
-
         card.innerHTML =
             '<div class="result-card-unit">' + unit.label + '</div>' +
-            '<div class="result-card-value">' + formatNumber(convertedValue) + '</div>' +
+            '<div class="result-card-value">' + formatNumber(value) + '</div>' +
             '<div class="result-card-abbr">' + unit.abbr + '</div>';
 
-        gridElement.appendChild(card);
+        grid.appendChild(card);
     });
 }
 
 
-/* ── 5. RUNNING A CONVERSION ─────────────────────────────────── */
-
-function runConversion(amountInputId, unitSelectId, unitList, resultsGridId) {
-    const amount = parseFloat(document.getElementById(amountInputId).value);
-    const fromKey = document.getElementById(unitSelectId).value;
-    const grid = document.getElementById(resultsGridId);
-
-    // convert() returns null when the amount field is empty or invalid
-    const results = convert(amount, fromKey, unitList);
-
-    renderResults(results, fromKey, unitList, grid);
-}
-
-
-/* ── 6. TAB SWITCHING ────────────────────────────────────────── */
+/* ── 4. TAB SWITCHING ────────────────────────────────────────── */
 
 function setupTabs() {
     const tabButtons = document.querySelectorAll(".tab-btn");
@@ -135,23 +110,21 @@ function setupTabs() {
 }
 
 
-/* ── 7. ATTACHING EVENTS TO INPUTS ───────────────────────────── */
+/* ── 5. WIRE UP A PANEL ──────────────────────────────────────── */
 
-// Wire one calculator panel (volume or mass) and render its initial state
-function setupCalculator(amountId, unitId, unitList, resultsId) {
+// Re-render whenever the amount or unit changes, and once now for the initial state
+function setupCalculator(amountId, unitId, units, gridId) {
     function update() {
-        runConversion(amountId, unitId, unitList, resultsId);
+        renderConversions(amountId, unitId, units, gridId);
     }
 
     document.getElementById(amountId).addEventListener("input", update);
     document.getElementById(unitId).addEventListener("change", update);
-
-    // Run once now: with an empty amount this shows the placeholder
     update();
 }
 
 
-/* ── 8. INITIALISATION ───────────────────────────────────────── */
+/* ── 6. INITIALISATION ───────────────────────────────────────── */
 
 document.addEventListener("DOMContentLoaded", function () {
     setupTabs();

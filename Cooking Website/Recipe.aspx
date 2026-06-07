@@ -32,9 +32,6 @@
                 <span class="recipe-difficulty <%= CurrentRecipe.Difficulty.ToLower() %>">
                     <%: CurrentRecipe.Difficulty %>
                 </span>
-                <asp:Panel ID="ForYouPanel" runat="server" CssClass="for-you-badge">
-                    For You
-                </asp:Panel>
             </div>
 
             <h1><%: CurrentRecipe.Title %></h1>
