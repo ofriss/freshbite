@@ -47,6 +47,7 @@ function checkName() {
     if (!requireCondition(val.length >= 4, els.usernameMsg, 'Username too short.')) return false;
     if (!requireCondition(!/\s/.test(val), els.usernameMsg, 'No spaces allowed.')) return false;
     if (!requireCondition(!/[^a-zA-Z0-9]/.test(val), els.usernameMsg, 'No special characters allowed.')) return false;
+    if (!requireCondition(val.charAt(0) != val.charAt(0).toLowerCase(), els.usernameMsg, 'First character has to be uppercase.')) return false;
 
     return true;
 }
