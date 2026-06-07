@@ -10,6 +10,9 @@ namespace Cooking_Website
         // On postback: validates credentials, sets session vars, increments LoggedIn counter, then redirects
         protected void Page_Load(object sender, EventArgs e)
         {
+            if (Session["Id"] != null)
+                Response.Redirect("/Index.aspx");
+
             if (!IsPostBack)
                 return;
 

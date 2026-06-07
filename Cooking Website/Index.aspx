@@ -25,7 +25,7 @@
         <div class="feature-card">
             <span class="feature-icon">&#9997;</span>
             <h3>Cooking Guides</h3>
-            <p>In-depth guides for every ingredient — from meat and fish to bread and sauces. Learn the techniques, not just the recipe.</p>
+            <p>In-depth guides for every ingredient. Learn the techniques, not just the recipe.</p>
             <% if (Session["Id"] != null) { %>
             <a href="/Guides/MeatGuide.aspx" class="feature-link">Browse guides &#8594;</a>
             <% } else { %>
@@ -35,13 +35,13 @@
         <div class="feature-card">
             <span class="feature-icon">&#127859;</span>
             <h3>Recipes</h3>
-            <p>A curated collection filtered to your skill level and favourite cuisines — so you always see what suits you first.</p>
+            <p>A curated collection filtered to your skill level and favourite cuisines.</p>
             <a href="/Recipes.aspx" class="feature-link">View recipes &#8594;</a>
         </div>
         <div class="feature-card">
             <span class="feature-icon">&#9201;</span>
             <h3>Kitchen Tools</h3>
-            <p>A units calculator for any measurement in any recipe, and a distraction-free cooking timer — always a click away.</p>
+            <p>A units calculator for any measurement in any recipe, and a distraction-free cooking timer.</p>
             <a href="/Utilities/UnitsCalculator.aspx" class="feature-link">Calculator &#8594;</a>
             <a href="/Utilities/Timer.aspx" class="feature-link">Timer &#8594;</a>
         </div>

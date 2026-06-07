@@ -67,9 +67,9 @@ namespace Cooking_Website.Admin
 
                 // JS-escape all string fields placed inside single-quoted onclick arguments
                 string usernameJs = username.Replace("\\", "\\\\").Replace("'", "\\'");
-                string genderJs   = gender.Replace("\\", "\\\\").Replace("'", "\\'");
-                string cuisineJs  = cuisine.Replace("\\", "\\\\").Replace("'", "\\'");
-                string skillJs    = skill.Replace("\\", "\\\\").Replace("'", "\\'");
+                string genderJs = gender.Replace("\\", "\\\\").Replace("'", "\\'");
+                string cuisineJs = cuisine.Replace("\\", "\\\\").Replace("'", "\\'");
+                string skillJs = skill.Replace("\\", "\\\\").Replace("'", "\\'");
 
                 html += "<tr>";
                 html += $"<td>{id}</td>";
